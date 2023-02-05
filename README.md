@@ -5,3 +5,6 @@ We permit the user to use parts of this repository ONLY for the purpose of acade
 
 
 Umrawal, A. K., Quinn, C. J., and Aggarwal, V.  (2022). Leveraging the Community Structure of a Social Network for Maximizing the Spread of Influence. IEEE Transactions on Emerging Technologies on Computational Intelligence (TETCI).
+
+
+For questions, email to aumrawal@purdue.edu
