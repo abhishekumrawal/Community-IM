@@ -6,7 +6,7 @@ Created on Tue May 21 21:30:04 2019
 @author: abhishek.umrawal
 """
 
-"importing required built-in modules"
+# importing required built-in modules"
 import json
 import logging
 import os
@@ -20,7 +20,12 @@ import pandas as pd
 
 
 def celfpp_im(
-    network, weighting_scheme, budget, diffusion_model, n_sim=100, all_upto_budget=True
+    network,
+    weighting_scheme,
+    budget,
+    diffusion_model,
+    n_sim: int = 100,
+    all_upto_budget: bool = True,
 ):
     "results folder"
     results_folder = "results/results_" + diffusion_model + "_" + weighting_scheme
@@ -182,7 +187,8 @@ def celfpp_im(
     exp_influence = [float(x) for x in exp_influence]
 
     best_seed_set += random.sample(
-        set(list(network.nodes)).difference(best_seed_set), budget - len(best_seed_set)
+        list(set(list(network.nodes)).difference(best_seed_set)),
+        budget - len(best_seed_set),
     )
     exp_influence += [exp_influence[-1] for x in range(budget - len(exp_influence))]
 
