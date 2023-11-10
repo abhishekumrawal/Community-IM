@@ -85,7 +85,7 @@ all_algorithms = [
 all_name_ids = ["_facebook", "_bitcoin", "_wikipedia", "_epinions"]  # all networks
 
 """specify what all you need to do"""
-run_algos = 0
+run_algos = 1
 evaluation = 1
 compilation = 1
 summarization = 1
