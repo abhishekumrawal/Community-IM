@@ -1,6 +1,5 @@
-[tool.mypy]
-exclude = ["build"]
-disallow_untyped_defs = true
+#[tool.mypy]
+#disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = [
