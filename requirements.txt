@@ -6,3 +6,8 @@ Flake8-pyproject==1.2.3
 isort==5.10.1
 mypy==1.1.1
 networkx==2.6.2
+pandas-stubs==2.1.1.230928
+pandas==2.1.1
+matplotlib==3.8.1
+matplotlib-stubs==0.2.0
+numpy==1.26.1
