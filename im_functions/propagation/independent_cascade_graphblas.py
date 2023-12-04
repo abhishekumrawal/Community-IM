@@ -12,10 +12,9 @@ __author__ = """Hung-Hsuan Chen (hhchen@psu.edu)"""
 import copy
 import random
 
-import graphblas as gb
 import networkx as nx
 
-__all__ = ["independent_cascade"]
+__all__ = ["independent_cascade_fast"]
 
 
 def independent_cascade_fast(G, seeds, *, steps=0, random_seed=None):
@@ -76,40 +75,15 @@ def independent_cascade_fast(G, seeds, *, steps=0, random_seed=None):
         DG = copy.deepcopy(G)
 
     # init activation probabilities
-    for u, v, data in DG.edges.data():
-        act_prob = data.setdefault("act_prob", 0.1)
-
-        if act_prob > 1.0:
+    for e in DG.edges():
+        if "act_prob" not in DG[e[0]][e[1]]:
+            DG[e[0]][e[1]]["act_prob"] = 0.1
+        elif DG[e[0]][e[1]]["act_prob"] > 1:
             raise Exception(
-                f"edge activation probability {act_prob} cannot be larger than 1"
+                "edge activation probability:",
+                DG[e[0]][e[1]]["act_prob"],
+                "cannot be larger than 1",
             )
-
-    graph_mat = gb.io.from_networkx(DG, weight="act_prob")
-    print(graph_mat)
-    vals = [1 for _ in seeds]
-    pos_vector = gb.Vector.from_coo(seeds, vals, size=G.number_of_nodes())
-
-    def prob(x, y):
-        # return x * y
-        threshhold_prob = x * y
-        if random.random() <= threshhold_prob:
-            return 1
-        return 0
-
-    gb.binary.register_new("prob", prob)
-    gb.semiring.register_new("max_prob", gb.monoid.max, gb.binary.prob)
-
-    while True:
-        w = pos_vector.dup()
-
-        pos_vector(gb.op.max) << gb.semiring.max_prob(pos_vector @ graph_mat)
-
-        # The algorithm is converged once v stops changing
-        if pos_vector.isequal(w):
-            break
-        print(pos_vector)
-    print(pos_vector)
-    return []
 
     # perform diffusion
     A = copy.deepcopy(seeds)  # prevent side effect
