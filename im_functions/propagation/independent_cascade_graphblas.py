@@ -13,6 +13,7 @@ import copy
 import random
 
 import networkx as nx
+from numba import jit
 
 __all__ = ["independent_cascade_fast"]
 
@@ -61,8 +62,6 @@ def independent_cascade_fast(G, seeds, *, steps=0, random_seed=None):
             "independent_cascade() is not defined for graphs with multiedges."
         )
 
-    rand_gen = random.Random(random_seed)
-
     # make sure the seeds are in the graph
     for s in seeds:
         if s not in G.nodes():
@@ -74,73 +73,39 @@ def independent_cascade_fast(G, seeds, *, steps=0, random_seed=None):
     else:
         DG = copy.deepcopy(G)
 
+    """
     # init activation probabilities
-    for e in DG.edges():
-        if "act_prob" not in DG[e[0]][e[1]]:
-            DG[e[0]][e[1]]["act_prob"] = 0.1
-        elif DG[e[0]][e[1]]["act_prob"] > 1:
-            raise Exception(
-                "edge activation probability:",
-                DG[e[0]][e[1]]["act_prob"],
-                "cannot be larger than 1",
-            )
+    for u, v, data in sorted(DG.edges(data=True)):
+        act_prob = data.setdefault("act_prob", 0.1)
+        data["success_prob"] = rand_gen.random()
+        if act_prob > 1.0:
+            raise Exception()
+    """
+
+    adjusted_list = {}
+
+    for u, v, data in DG.edges(data=True):
+        adj_list = adjusted_list.setdefault(u, [])
+        if data["success_prob"] <= data["act_prob"]:
+            adj_list.append(v)
+
+    # adj_dict = nx.to_dict_of_dicts(DG)
 
     # perform diffusion
-    A = copy.deepcopy(seeds)  # prevent side effect
-    if steps <= 0:
-        # perform diffusion until no more nodes can be activated
-        return _diffuse_all(DG, A, rand_gen)
-    # perform diffusion for at most "steps" rounds
-    return _diffuse_k_rounds(DG, A, steps, rand_gen)
+    layers = []
+    seen = set(seeds)
 
+    curr_layer = copy.deepcopy(seeds)
 
-def _diffuse_all(G, A, rand_gen):
-    tried_edges = set()
-    layer_i_nodes = []
-    layer_i_nodes.append([i for i in A])  # prevent side effect
-    while True:
-        len_old = len(A)
-        (A, activated_nodes_of_this_round, cur_tried_edges) = _diffuse_one_round(
-            G, A, tried_edges, rand_gen
-        )
-        layer_i_nodes.append(activated_nodes_of_this_round)
-        tried_edges = tried_edges.union(cur_tried_edges)
-        if len(A) == len_old:
-            break
-    return layer_i_nodes
+    while curr_layer:
+        layers.append(curr_layer)
+        curr_layer = []
+        for node in layers[-1]:
+            for neighbor in adjusted_list[node]:
+                if neighbor in seen:
+                    continue
 
+                curr_layer.append(neighbor)
+                seen.add(neighbor)
 
-def _diffuse_k_rounds(G, A, steps, rand_gen):
-    tried_edges = set()
-    layer_i_nodes = []
-    layer_i_nodes.append([i for i in A])
-    while steps > 0 and len(A) < len(G):
-        len_old = len(A)
-        (A, activated_nodes_of_this_round, cur_tried_edges) = _diffuse_one_round(
-            G, A, tried_edges, rand_gen
-        )
-        layer_i_nodes.append(activated_nodes_of_this_round)
-        tried_edges = tried_edges.union(cur_tried_edges)
-        if len(A) == len_old:
-            break
-        steps -= 1
-    return layer_i_nodes
-
-
-def _diffuse_one_round(G, A, tried_edges, rand_gen):
-    activated_nodes_of_this_round = set()
-    cur_tried_edges = set()
-    for s in A:
-        for nb in G.successors(s):
-            if nb in A or (s, nb) in tried_edges or (s, nb) in cur_tried_edges:
-                continue
-            if _prop_success(G, s, nb, rand_gen):
-                activated_nodes_of_this_round.add(nb)
-            cur_tried_edges.add((s, nb))
-    activated_nodes_of_this_round = list(activated_nodes_of_this_round)
-    A.extend(activated_nodes_of_this_round)
-    return A, activated_nodes_of_this_round, cur_tried_edges
-
-
-def _prop_success(G, src, dest, rand_gen):
-    return rand_gen.random() <= G[src][dest]["act_prob"]
+    return layers
