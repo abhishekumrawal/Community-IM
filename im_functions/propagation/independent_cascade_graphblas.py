@@ -130,5 +130,3 @@ def _diffuse_one_round(G, A, tried_edges):
 
 def _prop_success(G, src, dest):
   return random.random() <= G[src][dest]['act_prob']
-
-
