@@ -15,7 +15,7 @@ import random
 
 __all__ = ['independent_cascade']
 
-def independent_cascade(G, seeds, steps=0):
+def independent_cascade_fast(G, seeds, *, steps=0, random_seed = None):
   """Return the active nodes of each diffusion step by the independent cascade
   model
 
@@ -58,6 +58,8 @@ def independent_cascade(G, seeds, steps=0):
       raise Exception( \
           "independent_cascade() is not defined for graphs with multiedges.")
 
+  rand_gen = random.Random(random_seed)
+
   # make sure the seeds are in the graph
   for s in seeds:
     if s not in G.nodes():
@@ -81,32 +83,32 @@ def independent_cascade(G, seeds, steps=0):
   A = copy.deepcopy(seeds)  # prevent side effect
   if steps <= 0:
     # perform diffusion until no more nodes can be activated
-    return _diffuse_all(DG, A)
+    return _diffuse_all(DG, A, rand_gen)
   # perform diffusion for at most "steps" rounds
-  return _diffuse_k_rounds(DG, A, steps)
+  return _diffuse_k_rounds(DG, A, steps, rand_gen)
 
-def _diffuse_all(G, A):
+def _diffuse_all(G, A, rand_gen):
   tried_edges = set()
   layer_i_nodes = [ ]
   layer_i_nodes.append([i for i in A])  # prevent side effect
   while True:
     len_old = len(A)
     (A, activated_nodes_of_this_round, cur_tried_edges) = \
-        _diffuse_one_round(G, A, tried_edges)
+        _diffuse_one_round(G, A, tried_edges, rand_gen)
     layer_i_nodes.append(activated_nodes_of_this_round)
     tried_edges = tried_edges.union(cur_tried_edges)
     if len(A) == len_old:
       break
   return layer_i_nodes
 
-def _diffuse_k_rounds(G, A, steps):
+def _diffuse_k_rounds(G, A, steps, rand_gen):
   tried_edges = set()
   layer_i_nodes = [ ]
   layer_i_nodes.append([i for i in A])
   while steps > 0 and len(A) < len(G):
     len_old = len(A)
     (A, activated_nodes_of_this_round, cur_tried_edges) = \
-        _diffuse_one_round(G, A, tried_edges)
+        _diffuse_one_round(G, A, tried_edges, rand_gen)
     layer_i_nodes.append(activated_nodes_of_this_round)
     tried_edges = tried_edges.union(cur_tried_edges)
     if len(A) == len_old:
@@ -114,19 +116,19 @@ def _diffuse_k_rounds(G, A, steps):
     steps -= 1
   return layer_i_nodes
 
-def _diffuse_one_round(G, A, tried_edges):
+def _diffuse_one_round(G, A, tried_edges, rand_gen):
   activated_nodes_of_this_round = set()
   cur_tried_edges = set()
   for s in A:
     for nb in G.successors(s):
       if nb in A or (s, nb) in tried_edges or (s, nb) in cur_tried_edges:
         continue
-      if _prop_success(G, s, nb):
+      if _prop_success(G, s, nb, rand_gen):
         activated_nodes_of_this_round.add(nb)
       cur_tried_edges.add((s, nb))
   activated_nodes_of_this_round = list(activated_nodes_of_this_round)
   A.extend(activated_nodes_of_this_round)
   return A, activated_nodes_of_this_round, cur_tried_edges
 
-def _prop_success(G, src, dest):
-  return random.random() <= G[src][dest]['act_prob']
+def _prop_success(G, src, dest, rand_gen):
+  return rand_gen.random() <= G[src][dest]['act_prob']
