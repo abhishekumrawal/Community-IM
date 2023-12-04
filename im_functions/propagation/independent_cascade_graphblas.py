@@ -14,6 +14,7 @@ import random
 
 import networkx as nx
 from numba import jit
+from numba.typed import Dict, List
 
 __all__ = ["independent_cascade_fast"]
 
@@ -81,7 +82,6 @@ def independent_cascade_fast(G, seeds, *, steps=0, random_seed=None):
         if act_prob > 1.0:
             raise Exception()
     """
-
     adjusted_list = {}
 
     for u, v, data in DG.edges(data=True):
@@ -89,6 +89,11 @@ def independent_cascade_fast(G, seeds, *, steps=0, random_seed=None):
         if data["success_prob"] <= data["act_prob"]:
             adj_list.append(v)
 
+    return diffuse(adjusted_list, seeds)
+
+
+# @jit(nopython=True)
+def diffuse(adjusted_list, seeds):
     # adj_dict = nx.to_dict_of_dicts(DG)
 
     # perform diffusion

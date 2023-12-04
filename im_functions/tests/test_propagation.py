@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import random
+import time
 
 import networkx as nx
 
@@ -11,8 +12,9 @@ from im_functions.propagation.independent_cascade_graphblas import (
 
 
 def test_independent_cascade() -> None:
-    n = 100
-    p = 0.2
+    n = 1000
+    p = 0.1
+    k = 10
     test_graph = nx.fast_gnp_random_graph(n, p)
 
     for u, v, data in test_graph.edges(data=True):
@@ -22,10 +24,18 @@ def test_independent_cascade() -> None:
             raise Exception()
 
     nodes = list(test_graph.nodes)
-    seeds = random.sample(nodes, 10)
-    activated_nodes_levels = independent_cascade(test_graph, seeds, random_seed=1234)
-    print(activated_nodes_levels)
+    seeds = random.sample(nodes, k)
+    print("Starting")
+    start = time.perf_counter()
+    activated_nodes_levels = independent_cascade(test_graph, seeds)
+    end = time.perf_counter()
+    print("Slow time:", end - start)
 
+    start = time.perf_counter()
+    independent_cascade_fast(test_graph, seeds)
+    end = time.perf_counter()
+    print("Fast time:", end - start)
+    assert False
     for _ in range(10):
         for level_a, level_b in zip(
             activated_nodes_levels, independent_cascade_fast(test_graph, seeds)
