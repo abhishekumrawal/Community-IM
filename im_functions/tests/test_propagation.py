@@ -35,9 +35,11 @@ def test_independent_cascade() -> None:
     independent_cascade_fast(test_graph, seeds)
     end = time.perf_counter()
     print("Fast time:", end - start)
-    assert False
+    # assert False
     for _ in range(10):
         for level_a, level_b in zip(
             activated_nodes_levels, independent_cascade_fast(test_graph, seeds)
         ):
             assert set(level_a) == set(level_b)
+
+    assert False

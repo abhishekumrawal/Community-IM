@@ -10,11 +10,9 @@ Implement independent cascade model
 __author__ = """Hung-Hsuan Chen (hhchen@psu.edu)"""
 
 import copy
-import random
 
+import graphblas_algorithms as ga
 import networkx as nx
-from numba import jit
-from numba.typed import Dict, List
 
 __all__ = ["independent_cascade_fast"]
 
@@ -74,43 +72,16 @@ def independent_cascade_fast(G, seeds, *, steps=0, random_seed=None):
     else:
         DG = copy.deepcopy(G)
 
-    """
-    # init activation probabilities
-    for u, v, data in sorted(DG.edges(data=True)):
-        act_prob = data.setdefault("act_prob", 0.1)
-        data["success_prob"] = rand_gen.random()
-        if act_prob > 1.0:
-            raise Exception()
-    """
-    adjusted_list = {}
+    # adjusted_list = {}
+    edge_to_remove = []
 
     for u, v, data in DG.edges(data=True):
-        adj_list = adjusted_list.setdefault(u, [])
-        if data["success_prob"] <= data["act_prob"]:
-            adj_list.append(v)
+        # adj_list = adjusted_list.setdefault(u, [])
+        if data["success_prob"] > data["act_prob"]:
+            edge_to_remove.append((u, v))
 
-    return diffuse(adjusted_list, seeds)
+    DG.remove_edges_from(edge_to_remove)
 
-
-# @jit(nopython=True)
-def diffuse(adjusted_list, seeds):
-    # adj_dict = nx.to_dict_of_dicts(DG)
-
-    # perform diffusion
-    layers = []
-    seen = set(seeds)
-
-    curr_layer = copy.deepcopy(seeds)
-
-    while curr_layer:
-        layers.append(curr_layer)
-        curr_layer = []
-        for node in layers[-1]:
-            for neighbor in adjusted_list[node]:
-                if neighbor in seen:
-                    continue
-
-                curr_layer.append(neighbor)
-                seen.add(neighbor)
-
-    return layers
+    DG2 = ga.Graph.from_networkx(DG)
+    layers = ga.bfs_layers(DG2, seeds)
+    return list(map(list, layers))
