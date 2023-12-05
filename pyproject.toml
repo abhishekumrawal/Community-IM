@@ -3,7 +3,8 @@
 
 [[tool.mypy.overrides]]
 module = [
-  "networkx.*"
+  "networkx.*",
+  "graphblas_algorithms.*"
 ]
 ignore_missing_imports = true
 

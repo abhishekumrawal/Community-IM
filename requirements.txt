@@ -14,3 +14,5 @@ numpy==1.26.1
 igraph==0.11.2
 pytest
 pytest-benchmark
+louvain
+leidenalg

@@ -6,7 +6,7 @@ Created on Mon Mar 12 18:29:52 2018
 @author: abhishek.umrawal
 """
 
-"importing required built-in modules"
+# importing required built-in modules
 import json
 import logging
 import os
@@ -17,7 +17,7 @@ import timeit
 import numpy as np
 from networkx.algorithms.community import is_partition, modularity, partition_quality
 
-"importing required user-defined modules"
+# importing required user-defined modules
 from im_functions.celfpp_im import celfpp_im
 from im_functions.community_detection import community_detection
 from im_functions.progressive_budgeting import progressive_budgeting
