@@ -7,34 +7,49 @@ Created on Fri Feb 15 19:17:14 2019
 """
 
 
+# importing required built-in modules
+import itertools
+import logging
+import os
+import pickle
+import shutil
+import timeit
+
+import networkx as nx
+from networkx.classes.function import density
+
+# importing required user-defined modules
+from im_functions.non_adaptive_im import non_adaptive_im
+
+
 def main_offline(
     name_id,
     graph_type,
     max_budget,
     algorithms,
-    heuristics,
+    heuristics: list[str],
     diffusion_models,
     is_graph_already_weighted,
     weighting_schemes,
     n_sim,
-    communities,
+    communities: list[str],
     community_methods,
     community_size_threshold,
 ):
-    "debugging functionality"
+    # debugging functionality
     # clear : to clear the console
     # reset: to clear all variables
     # %run filename.py to run from console
 
-    DEBUG_MODE = False
-    import pdb
+    # DEBUG_MODE = False
+    # import pdb
 
-    if DEBUG_MODE:
-        pdb.set_trace()
-    else:
-        pdb.set_trace = lambda: 1
+    # if DEBUG_MODE:
+    #    pdb.set_trace()
+    # else:
+    #    pdb.set_trace = lambda: 1
 
-    "important debugging tips"
+    # important debugging tips
     # if don't specify pdb.set_trace() here then do python -m pdb <filename.py> from terminal
     # type c to continue running until next breakpoint()
     # type a to see arguments with their values for the current function
@@ -46,27 +61,13 @@ def main_offline(
     # type q to quit -- all variables made until then would be saved
     # type pdb.set_trace = lambda: 1 to neutralize pdb for the entire session
 
-    "importing required built-in modules"
-    import itertools
-    import logging
-    import os
-    import pickle
-    import shutil
-    import timeit
-
-    import networkx as nx
-    from networkx.classes.function import density
-
-    "importing required user-defined modules"
-    from im_functions.non_adaptive_im import non_adaptive_im
-
-    "start time"
+    # start time
     start = timeit.default_timer()
 
-    "adding '' to heuristics for celfpp and celfpp1"
+    # adding '' to heuristics for celfpp and celfpp1
     heuristics = [""] + heuristics
 
-    "reading the network"
+    # reading the network
     if "florentine" in name_id:
         network = nx.florentine_families_graph()
         network.name = name_id
@@ -101,7 +102,7 @@ def main_offline(
         network.name = name_id
         network = network.to_directed()
 
-    "relabeling the nodes as positive integers viz. 1,2,..."
+    # relabeling the nodes as positive integers viz. 1,2,...
     network = nx.convert_node_labels_to_integers(network, first_label=1)
 
     print("Network is connected: " + str(nx.is_strongly_connected(network)))
