@@ -11,6 +11,7 @@ import timeit
 
 import networkx as nx
 import numpy as np
+from tqdm import tqdm
 
 from im_functions.independent_cascade import independent_cascade
 from im_functions.linear_threshold import linear_threshold
@@ -24,7 +25,7 @@ def true_influence(inpt):
     nodes = list(nx.nodes(network))
     influence = 0
 
-    for j in range(n_sim):
+    for _ in tqdm(range(n_sim)):
         new_seeds = seed_set
 
         if len(spontaneous_prob) != 0:
