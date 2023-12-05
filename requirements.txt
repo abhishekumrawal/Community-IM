@@ -10,10 +10,10 @@ pandas-stubs==2.1.1.230928
 pandas==2.1.1
 matplotlib==3.8.1
 matplotlib-stubs==0.2.0
-numpy==1.26.1
-igraph==0.11.2
+numpy
+igraph==0.10
 pytest
 pytest-benchmark
 louvain
-leidenalg
+leidenalg==0.10.1
 graphblas_algorithms

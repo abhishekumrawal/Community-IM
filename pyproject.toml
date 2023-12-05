@@ -19,3 +19,37 @@ extend-ignore = ["E203", "W503"]
 # Per <https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#profile>
 [tool.isort]
 profile = "black"
+
+[tool.poetry]
+name = "community-im"
+version = "0.1.0"
+description = ""
+authors = ["Eliot Robson <eliot.robson24@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+black = "23.3.0"
+flake8 = "6.0.0"
+flake8-black = "0.3.6"
+flake8-isort = "6.0.0"
+flake8-pyproject = "1.2.3"
+isort = "5.10.1"
+mypy = "1.1.1"
+networkx = "2.6.2"
+pandas-stubs = "2.1.1.230928"
+pandas = "2.1.1"
+matplotlib = "3.8.1"
+matplotlib-stubs = "0.2.0"
+numpy = "^1.26.2"
+igraph = "0.10"
+pytest = "^7.4.3"
+pytest-benchmark = "^4.0.0"
+louvain = "^0.8.1"
+leidenalg = "0.10.1"
+graphblas-algorithms = "^2023.10.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
