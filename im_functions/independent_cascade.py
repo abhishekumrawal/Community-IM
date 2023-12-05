@@ -149,12 +149,15 @@ def _prop_success(G, src, dest, rand_gen):
 
 
 def _graphblas_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[int]]:
+    if not G.is_directed():
+        G = G.to_directed()
+
     temp_graph = nx.DiGraph()
     temp_graph.add_nodes_from(G.nodes())
     temp_graph.add_edges_from(
         (u, v)
         for u, v, data in G.edges(data=True)
-        if data.get("success_prob", random.random()) <= data["act_prob"]
+        if data.get("success_prob", random.random()) <= data.get("act_prob", 0.1)
     )
 
     DG2 = ga.Graph.from_networkx(temp_graph)
