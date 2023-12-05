@@ -157,7 +157,7 @@ def celfpp_im(
     os.chdir("..")
     os.chdir("..")
 
-    "##### Calling CELF++"
+    # Calling CELF++
     start = timeit.default_timer()
     os.system(
         celfpp_folder_new
@@ -168,23 +168,23 @@ def celfpp_im(
     end = timeit.default_timer()
     runtime = end - start
 
-    "##### Saving runtime info to a text file"
+    # Saving runtime info to a text file
     runtime_info = {"celfpp": runtime}
     fstr = results_folder_runtime_files + os.sep + "runtime_info_celfpp.txt"
     with open(fstr, "w") as f:
         f.write(json.dumps(runtime_info))
 
-    "#### Output filename for best seed set"
+    # Output filename for best seed set
     if diffusion_model == "independent_cascade":
         out_filename = celfpp_folder_new + "/output/IC_CelfPlus_Greedy.txt"
     elif diffusion_model == "linear_threshold":
         out_filename = celfpp_folder_new + "/output/LT_CelfPlus_Greedy.txt"
 
-    "#### Getting the best seed set and exp influence"
-    best_seed_set = [x.split(" ")[0] for x in open(out_filename).readlines()]
-    exp_influence = [x.split(" ")[1] for x in open(out_filename).readlines()]
-    best_seed_set = [int(x) for x in best_seed_set]
-    exp_influence = [float(x) for x in exp_influence]
+    # Getting the best seed set and exp influence
+    best_seed_set_raw = [x.split(" ")[0] for x in open(out_filename).readlines()]
+    exp_influence_raw = [x.split(" ")[1] for x in open(out_filename).readlines()]
+    best_seed_set = [int(x) for x in best_seed_set_raw]
+    exp_influence = [float(x) for x in exp_influence_raw]
 
     best_seed_set += random.sample(
         list(set(list(network.nodes)).difference(best_seed_set)),

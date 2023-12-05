@@ -49,6 +49,7 @@ louvain = "^0.8.1"
 leidenalg = "0.10.1"
 graphblas-algorithms = "^2023.10.0"
 scipy = "^1.11.4"
+tikzplotlib = "^0.10.1"
 
 
 [build-system]
