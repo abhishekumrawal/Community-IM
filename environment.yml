@@ -1,0 +1,26 @@
+name: community
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - black=23.3.0
+  - flake8=6.0.0
+  - flake8-black=0.3.6
+  - flake8-isort=6.0.0
+  - Flake8-pyproject=1.2.3
+  - isort=5.10.1
+  - mypy=1.1.1
+  - networkx=2.6.2
+  - pandas-stubs=2.1.1.230928
+  - pandas=2.1.1
+  - matplotlib=3.8.1
+  - numpy=1.26.2
+  - python-igraph=0.11.3
+  - pytest
+  - pytest-benchmark
+  - louvain
+  - leidenalg
+  - graphblas-algorithms
+  - pip:
+    - matplotlib-stubs==0.2.0
