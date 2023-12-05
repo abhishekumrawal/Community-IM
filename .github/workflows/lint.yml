@@ -35,9 +35,7 @@ jobs:
       - name: Install Environment
         run: poetry install --no-root --sync
       - name: Run mypy
-        run: |
-
-          mypy .
+        run: poetry run mypy .
 
       - name: Run flake8
-        run: flake8 .
+        run: poetry run flake8 .
