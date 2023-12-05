@@ -6,10 +6,11 @@ Created on Tue Mar 13 21:39:24 2018
 @author: abhishek.umrawal
 """
 
-import networkx as nx
-import numpy as np
 import logging
 import timeit
+
+import networkx as nx
+import numpy as np
 
 from im_functions.independent_cascade import independent_cascade
 from im_functions.linear_threshold import linear_threshold
@@ -24,22 +25,21 @@ def true_influence(inpt):
     influence = 0
 
     for j in range(n_sim):
-        spontaneously_infected = []
+        new_seeds = seed_set
 
         if len(spontaneous_prob) != 0:
+            spontaneously_infected = []
             for m in range(len(network)):
                 if np.random.rand() < spontaneous_prob[m]:
                     spontaneously_infected.append(nodes[m])
 
+            new_seeds = list(set(spontaneously_infected + new_seeds))
+
         if diffusion_model == "independent_cascade":
-            layers = independent_cascade(
-                network, list(set(spontaneously_infected + seed_set))
-            )
+            layers = independent_cascade(network, new_seeds)
 
         elif diffusion_model == "linear_threshold":
-            layers = linear_threshold(
-                network, list(set(spontaneously_infected + seed_set))
-            )
+            layers = linear_threshold(network, new_seeds)
 
         for k in range(len(layers)):
             influence = influence + len(layers[k])
