@@ -5,11 +5,7 @@ import time
 
 import networkx as nx
 
-from im_functions.propagation.independent_cascade import independent_cascade
-
-# from im_functions.propagation.independent_cascade_graphblas import (
-#    independent_cascade_fast,
-# )
+from im_functions.independent_cascade import independent_cascade
 
 
 def test_independent_cascade() -> None:
