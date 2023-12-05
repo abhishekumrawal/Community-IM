@@ -8,6 +8,7 @@ module = [
   "louvain.*",
   "leidenalg.*",
   "igraph.*",
+  "tikzplotlib.*",
 ]
 ignore_missing_imports = true
 
