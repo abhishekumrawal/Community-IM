@@ -156,41 +156,29 @@ def _graphblas_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[
     current_layer = deque(seeds)
     visited = set(seeds)
 
-    # for source in current_layer:
-    #    if source not in G:
-    #        raise nx.NetworkXError(f"The node {source} is not in the graph.")
-
     # this is basically BFS, except that the current layer only stores the nodes at
     # same distance from sources at each iteration
     res = []
     while current_layer:
         q = len(current_layer)
-        res.append(list(current_layer))
-        # yield current_layer
+        next_layer = []
+
         for _ in range(q):
             next_node = current_layer.popleft()
+            next_layer.append(next_node)
             for child, data in G[next_node].items():
-                if child not in visited and data.get(
-                    "success_prob", random.random()
-                ) <= data.get("act_prob", 0.1):
-                    visited.add(child)
-                    current_layer.append(child)
-        # next_layer = []
-        # for node in current_layer:
-        # for child in G[node]:
-        #    if child not in visited:
-        #        visited.add(child)
-        #        next_layer.append(child)
-        # current_layer = next_layer
+                if child not in visited:
+                    # Lazy getter to deal with not having this set but still being
+                    # efficient
+                    succ_prob = data.get("success_prob")
+                    if succ_prob is None:
+                        succ_prob = random.random()
 
-    # temp_graph = nx.DiGraph()
-    # temp_graph.add_nodes_from(G.nodes())
-    # temp_graph.add_edges_from(
-    #    (u, v)
-    #    for u, v, data in G.edges(data=True)
-    #    if data.get("success_prob", random.random()) <= data.get("act_prob", 0.1)
-    # )
+                    if succ_prob <= data.get("act_prob", 0.1):
+                        visited.add(child)
+                        current_layer.append(child)
 
-    # DG2 = ga.Graph.from_networkx(temp_graph)
-    # layers = nx.bfs_layers(temp_graph, seeds)  # ga.bfs_layers(DG2, seeds)
+        if next_layer:
+            res.append(next_layer)
+
     return res
