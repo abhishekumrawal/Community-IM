@@ -11,6 +11,7 @@ __author__ = """Hung-Hsuan Chen (hhchen@psu.edu)"""
 
 import copy
 import random
+from collections import deque
 
 import graphblas_algorithms as ga
 import networkx as nx
@@ -152,14 +153,44 @@ def _graphblas_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[
     if not G.is_directed():
         G = G.to_directed()
 
-    temp_graph = nx.DiGraph()
-    temp_graph.add_nodes_from(G.nodes())
-    temp_graph.add_edges_from(
-        (u, v)
-        for u, v, data in G.edges(data=True)
-        if data.get("success_prob", random.random()) <= data.get("act_prob", 0.1)
-    )
+    current_layer = deque(seeds)
+    visited = set(seeds)
 
-    DG2 = ga.Graph.from_networkx(temp_graph)
-    layers = ga.bfs_layers(DG2, seeds)
-    return list(map(list, layers))
+    # for source in current_layer:
+    #    if source not in G:
+    #        raise nx.NetworkXError(f"The node {source} is not in the graph.")
+
+    # this is basically BFS, except that the current layer only stores the nodes at
+    # same distance from sources at each iteration
+    res = []
+    while current_layer:
+        q = len(current_layer)
+        res.append(list(current_layer))
+        # yield current_layer
+        for _ in range(q):
+            next_node = current_layer.popleft()
+            for child, data in G[next_node].items():
+                if child not in visited and data.get(
+                    "success_prob", random.random()
+                ) <= data.get("act_prob", 0.1):
+                    visited.add(child)
+                    current_layer.append(child)
+        # next_layer = []
+        # for node in current_layer:
+        # for child in G[node]:
+        #    if child not in visited:
+        #        visited.add(child)
+        #        next_layer.append(child)
+        # current_layer = next_layer
+
+    # temp_graph = nx.DiGraph()
+    # temp_graph.add_nodes_from(G.nodes())
+    # temp_graph.add_edges_from(
+    #    (u, v)
+    #    for u, v, data in G.edges(data=True)
+    #    if data.get("success_prob", random.random()) <= data.get("act_prob", 0.1)
+    # )
+
+    # DG2 = ga.Graph.from_networkx(temp_graph)
+    # layers = nx.bfs_layers(temp_graph, seeds)  # ga.bfs_layers(DG2, seeds)
+    return res
