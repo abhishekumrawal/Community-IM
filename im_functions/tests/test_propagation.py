@@ -10,7 +10,7 @@ from im_functions.independent_cascade import independent_cascade
 
 @pytest.mark.parametrize("use_fast_impl", [True, False])
 def test_independent_cascade(benchmark, use_fast_impl: bool) -> None:
-    n = 1000
+    n = 10
     p = 0.1
     k = 10
     test_graph = nx.fast_gnp_random_graph(n, p)

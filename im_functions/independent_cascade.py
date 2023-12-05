@@ -64,12 +64,10 @@ def independent_cascade(
             "independent_cascade() is not defined for graphs with multiedges."
         )
 
-    rand_gen = random.Random(random_seed)
+    if graphblas_impl:
+        return _graphblas_cascade(G, seeds)
 
-    # make sure the seeds are in the graph
-    for s in seeds:
-        if s not in G.nodes():
-            raise Exception("seed", s, "is not in graph")
+    rand_gen = random.Random(random_seed)
 
     # change to directed graph
     if not G.is_directed():
@@ -88,9 +86,6 @@ def independent_cascade(
             )
 
         data.setdefault("success_prob", rand_gen.random())
-
-    if graphblas_impl:
-        return _graphblas_cascade(DG, seeds)
 
     # perform diffusion
     A = copy.deepcopy(seeds)  # prevent side effect
@@ -153,16 +148,24 @@ def _prop_success(G, src, dest, rand_gen):
     return G[src][dest]["success_prob"] <= G[src][dest]["act_prob"]
 
 
-def _graphblas_cascade(DG: nx.DiGraph, seeds: list[int]) -> list[list[int]]:
-    edge_to_remove = []
+def _graphblas_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[int]]:
+    # edge_to_add = []
+    #:
+    #    :
+    #        edge_to_add.append()
 
-    for u, v, data in DG.edges(data=True):
-        # adj_list = adjusted_list.setdefault(u, [])
-        if data["success_prob"] > data["act_prob"]:
-            edge_to_remove.append((u, v))
+    # G.remove_edges_from(edge_to_remove)
+    temp_graph = nx.DiGraph()
+    temp_graph.add_nodes_from(G.nodes())
+    temp_graph.add_edges_from(
+        (u, v)
+        for u, v, data in G.edges(data=True)
+        if data["success_prob"] <= data["act_prob"]
+    )
 
-    DG.remove_edges_from(edge_to_remove)
+    # print(set(G.nodes()) ^ set(temp_graph.nodes()))
+    # print(set(G.edges()) ^ set(temp_graph))
 
-    DG2 = ga.Graph.from_networkx(DG)
+    DG2 = ga.Graph.from_networkx(temp_graph)
     layers = ga.bfs_layers(DG2, seeds)
     return list(map(list, layers))

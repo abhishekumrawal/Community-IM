@@ -25,6 +25,9 @@ def true_influence(inpt):
     nodes = list(nx.nodes(network))
     influence = 0
 
+    if not network.is_directed():
+        network = network.to_directed()
+
     for _ in tqdm(range(n_sim)):
         new_seeds = seed_set
 
