@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 import random
-import time
 
 import networkx as nx
+import pytest
 
 from im_functions.independent_cascade import independent_cascade
 
 
-def test_independent_cascade() -> None:
+@pytest.mark.parametrize("use_fast_impl", [True, False])
+def test_independent_cascade(benchmark, use_fast_impl: bool) -> None:
     n = 1000
     p = 0.1
     k = 10
@@ -20,26 +21,15 @@ def test_independent_cascade() -> None:
         if act_prob > 1.0:
             raise Exception()
 
-    # TODO add benchmarks to these tests
     nodes = list(test_graph.nodes)
     seeds = random.sample(nodes, k)
-    print("Starting")
-    start = time.perf_counter()
+
     activated_nodes_levels = independent_cascade(
         test_graph, seeds, graphblas_impl=False
     )
-    end = time.perf_counter()
-    print("Slow time:", end - start)
 
-    start = time.perf_counter()
-    independent_cascade(test_graph, seeds)
-    end = time.perf_counter()
-    print("Fast time:", end - start)
-    # assert False
-    for _ in range(10):
-        for level_a, level_b in zip(
-            activated_nodes_levels, independent_cascade(test_graph, seeds)
-        ):
-            assert set(level_a) == set(level_b)
-
-    # assert False
+    cascade_res = benchmark(
+        independent_cascade, test_graph, seeds, graphblas_impl=use_fast_impl
+    )
+    for level_a, level_b in zip(activated_nodes_levels, cascade_res):
+        assert set(level_a) == set(level_b)
