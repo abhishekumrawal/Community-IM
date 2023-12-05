@@ -16,3 +16,4 @@ pytest
 pytest-benchmark
 louvain
 leidenalg
+graphblas_algorithms
