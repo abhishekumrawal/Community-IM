@@ -6,9 +6,10 @@ import time
 import networkx as nx
 
 from im_functions.propagation.independent_cascade import independent_cascade
-from im_functions.propagation.independent_cascade_graphblas import (
-    independent_cascade_fast,
-)
+
+# from im_functions.propagation.independent_cascade_graphblas import (
+#    independent_cascade_fast,
+# )
 
 
 def test_independent_cascade() -> None:
@@ -23,23 +24,26 @@ def test_independent_cascade() -> None:
         if act_prob > 1.0:
             raise Exception()
 
+    # TODO add benchmarks to these tests
     nodes = list(test_graph.nodes)
     seeds = random.sample(nodes, k)
     print("Starting")
     start = time.perf_counter()
-    activated_nodes_levels = independent_cascade(test_graph, seeds)
+    activated_nodes_levels = independent_cascade(
+        test_graph, seeds, graphblas_impl=False
+    )
     end = time.perf_counter()
     print("Slow time:", end - start)
 
     start = time.perf_counter()
-    independent_cascade_fast(test_graph, seeds)
+    independent_cascade(test_graph, seeds)
     end = time.perf_counter()
     print("Fast time:", end - start)
     # assert False
     for _ in range(10):
         for level_a, level_b in zip(
-            activated_nodes_levels, independent_cascade_fast(test_graph, seeds)
+            activated_nodes_levels, independent_cascade(test_graph, seeds)
         ):
             assert set(level_a) == set(level_b)
 
-    assert False
+    # assert False

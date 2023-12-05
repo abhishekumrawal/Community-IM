@@ -12,12 +12,15 @@ __author__ = """Hung-Hsuan Chen (hhchen@psu.edu)"""
 import copy
 import random
 
+import graphblas_algorithms as ga
 import networkx as nx
 
 __all__ = ["independent_cascade"]
 
 
-def independent_cascade(G, seeds, *, steps=0, random_seed=None):
+def independent_cascade(
+    G, seeds, *, steps=0, random_seed=None, graphblas_impl: bool = True
+) -> list[list[int]]:
     """Return the active nodes of each diffusion step by the independent cascade
   model
 
@@ -74,20 +77,20 @@ def independent_cascade(G, seeds, *, steps=0, random_seed=None):
     else:
         DG = copy.deepcopy(G)
 
-    """
     # init activation probabilities
-    #for e in sorted(DG.edges()):
-    #    if "act_prob" not in DG[e[0]][e[1]]:
-    #        DG[e[0]][e[1]]["act_prob"] = 0.1
-    #    elif DG[e[0]][e[1]]["act_prob"] > 1:
+    for u, v, data in DG.edges(data=True):
+        act_prob = data.setdefault("act_prob", 0.1)
+        # if "act_prob" not in data:
+        #    data["act_prob"] = 0.1
+        if act_prob > 1.0:
             raise Exception(
-                "edge activation probability:",
-                DG[e[0]][e[1]]["act_prob"],
-                "cannot be larger than 1",
+                f"edge activation probability: {act_prob} cannot be larger than 1."
             )
-        DG[e[0]][e[1]]["success_prob"] = rand_gen.random()
-        print(e)
-    """
+
+        data.setdefault("success_prob", rand_gen.random())
+
+    if graphblas_impl:
+        return _graphblas_cascade(DG, seeds)
 
     # perform diffusion
     A = copy.deepcopy(seeds)  # prevent side effect
@@ -148,3 +151,18 @@ def _diffuse_one_round(G, A, tried_edges, rand_gen):
 
 def _prop_success(G, src, dest, rand_gen):
     return G[src][dest]["success_prob"] <= G[src][dest]["act_prob"]
+
+
+def _graphblas_cascade(DG: nx.DiGraph, seeds: list[int]) -> list[list[int]]:
+    edge_to_remove = []
+
+    for u, v, data in DG.edges(data=True):
+        # adj_list = adjusted_list.setdefault(u, [])
+        if data["success_prob"] > data["act_prob"]:
+            edge_to_remove.append((u, v))
+
+    DG.remove_edges_from(edge_to_remove)
+
+    DG2 = ga.Graph.from_networkx(DG)
+    layers = ga.bfs_layers(DG2, seeds)
+    return list(map(list, layers))
