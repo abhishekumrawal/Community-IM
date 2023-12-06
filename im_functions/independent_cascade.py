@@ -13,7 +13,6 @@ import copy
 import random
 from collections import deque
 
-import graphblas_algorithms as ga
 import networkx as nx
 
 __all__ = ["independent_cascade"]
@@ -153,19 +152,18 @@ def _graphblas_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[
     if not G.is_directed():
         G = G.to_directed()
 
-    current_layer = deque(seeds)
     visited = set(seeds)
 
     # this is basically BFS, except that the current layer only stores the nodes at
     # same distance from sources at each iteration
     res = []
-    while current_layer:
-        q = len(current_layer)
-        next_layer = []
+    current_layer = seeds.copy()
 
-        for _ in range(q):
-            next_node = current_layer.popleft()
-            next_layer.append(next_node)
+    while current_layer:
+        res.append(current_layer)
+        current_layer = []
+
+        for next_node in res[-1]:
             for child, data in G[next_node].items():
                 if child not in visited:
                     # Lazy getter to deal with not having this set but still being
@@ -177,8 +175,5 @@ def _graphblas_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[
                     if succ_prob <= data.get("act_prob", 0.1):
                         visited.add(child)
                         current_layer.append(child)
-
-        if next_layer:
-            res.append(next_layer)
 
     return res
