@@ -32,7 +32,7 @@ def main_offline(
     is_graph_already_weighted,
     weighting_schemes,
     n_sim,
-    communities: list[str],
+    communities: list[list[int]],
     community_methods,
     community_size_threshold,
 ):
