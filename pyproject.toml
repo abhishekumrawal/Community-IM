@@ -43,7 +43,7 @@ pandas = "2.1.1"
 matplotlib = "3.8.1"
 matplotlib-stubs = "0.2.0"
 numpy = "^1.26.2"
-igraph = "0.10"
+igraph = ">=0.10"
 pytest = "^7.4.3"
 pytest-benchmark = "^4.0.0"
 louvain = "^0.8.1"
@@ -52,6 +52,8 @@ graphblas-algorithms = "^2023.10.0"
 scipy = "^1.11.4"
 tikzplotlib = "^0.10.1"
 types-tqdm = "^4.66.0.5"
+tqdm = "^4.66.1"
+setuptools = "^69.0.3"
 
 
 [build-system]

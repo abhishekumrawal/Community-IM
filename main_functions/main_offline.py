@@ -114,7 +114,7 @@ def main_offline(
                 n_sims = pickle.load(f)
 
             n_sim = n_sims[name_id]
-        except:
+        except Exception:
             pass
 
     "create a list of all parameter lists, then use product"
@@ -133,8 +133,7 @@ def main_offline(
         [community_size_threshold],
         [is_graph_already_weighted],
     ]
-    inputs = itertools.product(*tmp)
-    inputs = [tuple(i) for i in inputs]
+    inputs = [tuple(i) for i in itertools.product(*tmp)]
 
     "removing redundant/unncessary inputs"
     inputs1 = []

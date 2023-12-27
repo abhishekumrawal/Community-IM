@@ -30,7 +30,7 @@ algorithms = [
     "celfpp",
     "ccelfpp1",
 ]  # ['heuristic','celfpp','ccelfpp1','genetic','cofim']
-heuristics = []  # ['degree','degdiscount']
+heuristics: list[str] = []  # ['degree','degdiscount']
 
 
 "diffusion models, weighting schemes and number of simulations"
@@ -40,7 +40,7 @@ weighting_schemes = ["wc"]  # 'tv' 'rn' 'wc'
 n_sim = 1000  # number of diffusions
 
 "community detection related inputs"
-communities = []  # pre-defined communities
+communities: list[list[int]] = []  # pre-defined communities
 
 if "_sbm" in name_id or "_lfr" in name_id:
     with open("network_data/" + name_id[1:] + "_network_communities.txt") as f:
