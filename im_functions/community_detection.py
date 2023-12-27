@@ -59,7 +59,7 @@ def community_detection(network, method="louvain"):
     if method == "louvain":
         "copy the given network from newtorkx object to an igraph object"
         "all edge attributes like direction and weight are preserved"
-        print(list(network.nodes))
+        # print(list(network.nodes))
         G = ig.Graph.from_networkx(network)  # use G.vs for vertices and G.es for edges
 
         part = louvain.find_partition(
