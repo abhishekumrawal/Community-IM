@@ -176,6 +176,12 @@ def ccelfpp1_im(
             n_sim,
             all_upto_budget=True,
         )
+
+        print(i)
+        print(best_seed_set)
+        print(runtime)
+        exit()
+
         runtime_info["celfpp"] += runtime
         logging.info(str(best_seed_set))
         logging.info(str(exp_influence))
@@ -226,8 +232,8 @@ def ccelfpp1_im(
     with open(fstr, "w") as f:
         f.write(json.dumps(runtime_info))
 
-    "saving results"
-    if all_upto_budget == True:
+    # saving results
+    if all_upto_budget:
         results = {
             "budget": budget,
             "diffusion_model": diffusion_model,

@@ -24,12 +24,10 @@ def test_independent_cascade(benchmark, use_fast_impl: bool) -> None:
     nodes = list(test_graph.nodes)
     seeds = random.sample(nodes, k)
 
-    activated_nodes_levels = independent_cascade(
-        test_graph, seeds, graphblas_impl=False
-    )
+    activated_nodes_levels = independent_cascade(test_graph, seeds, fast_impl=False)
 
     cascade_res = benchmark(
-        independent_cascade, test_graph, seeds, graphblas_impl=use_fast_impl
+        independent_cascade, test_graph, seeds, fast_impl=use_fast_impl
     )
     for level_a, level_b in zip(activated_nodes_levels, cascade_res):
         assert set(level_a) == set(level_b)

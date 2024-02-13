@@ -1,6 +1,7 @@
 """
 Implement independent cascade model
 """
+
 #!/usr/bin/env python
 #    Copyright (C) 2004-2010 by
 #    Hung-Hsuan Chen <hhchen@psu.edu>
@@ -19,7 +20,7 @@ __all__ = ["independent_cascade"]
 
 
 def independent_cascade(
-    G, seeds, *, steps=0, random_seed=None, graphblas_impl: bool = True
+    G, seeds, *, steps=0, random_seed=None, fast_impl: bool = True
 ) -> list[list[int]]:
     """Return the active nodes of each diffusion step by the independent cascade
   model
@@ -64,8 +65,8 @@ def independent_cascade(
             "independent_cascade() is not defined for graphs with multiedges."
         )
 
-    if graphblas_impl:
-        return _graphblas_cascade(G, seeds)
+    if fast_impl:
+        return _fast_cascade(G, seeds)
 
     rand_gen = random.Random(random_seed)
 
@@ -148,7 +149,7 @@ def _prop_success(G, src, dest, rand_gen):
     return G[src][dest]["success_prob"] <= G[src][dest]["act_prob"]
 
 
-def _graphblas_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[int]]:
+def _fast_cascade(G: nx.Graph | nx.DiGraph, seeds: list[int]) -> list[list[int]]:
     if not G.is_directed():
         G = G.to_directed()
 
