@@ -37,22 +37,25 @@ def community_celf(
 def _community_celf(
     starts: np.ndarray, edges: np.ndarray, communities: list[list[int]], budget: int
 ) -> list[int]:
-    seeds = set()
-    last_seed = None
+    seeds = {0}
+    seeds.clear()
+
     curr_best = -1
     curr_best_val = 0
 
-    # Tuple in heap is (mg1, mg2, prev_best, flag)
-    node_heap: list[tuple[int, int, int, int, int]] = []
+    # Tuple in heap is (mg1, mg2, prev_best, flag, v)
+    node_heap: list[tuple[int, int, int, int, int]] = [(0, 0, curr_best, 0, 0)]
+    hq.heappop(node_heap)
+
     for v in range(len(starts)):
         new_seeds = {v}
         if curr_best != -1:
             new_seeds.add(curr_best)
 
-        mg1 = fast_cascade(starts, edges, set(), new_seeds, [0])
+        mg1 = 0  # fast_cascade(starts, edges, set(), new_seeds)
         curr_tup = (
             -mg1,
-            -fast_cascade(starts, edges, set(), new_seeds, [0]),
+            0,  # -fast_cascade(starts, edges, set(), new_seeds, [0]),
             curr_best,
             0,
             v,
@@ -63,6 +66,7 @@ def _community_celf(
             curr_best_val = mg1
             curr_best = v
 
+    """
     while len(seeds) < budget:
         mg1, mg2, prev_best, flag, u = hq.heappop(node_heap)
         mg1 = -mg1
@@ -77,7 +81,7 @@ def _community_celf(
         else:
             seed_val = fast_cascade(starts, edges, seeds)
             mg1 = fast_cascade(starts, edges, seeds, [u]) - seed_val
-            mg2 = fast_cascade(starts, edges, seeds, [u, curr_best])
+            mg2 = fast_cascade(starts, edges, seeds, [u])
 
         flag = len(seeds)
         curr_tup = (
@@ -93,13 +97,14 @@ def _community_celf(
             curr_best_val = mg1
             curr_best = u
 
+    """
     return seeds
 
 
 @nb.njit
 def fast_cascade(
     starts: np.ndarray, edges: np.ndarray, seeds: set[int], new_nodes: list[int]
-):
+) -> int:
     visited = set(seeds)
 
     # this is basically BFS, except that the current layer only stores the nodes at

@@ -5,7 +5,7 @@ import random
 import networkx as nx
 import pytest
 
-from im_functions.c_celfpp_nb import community_celf
+from im_functions.c_celfpp_nb import community_celf, fast_cascade
 
 
 def test_community_celf() -> None:
