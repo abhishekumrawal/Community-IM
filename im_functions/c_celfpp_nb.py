@@ -39,7 +39,6 @@ def _community_celf(
     starts: np.ndarray, edges: np.ndarray, community: set[int], budget: int
 ) -> list[int]:
     seeds = {0}
-    seeds.clear()
 
     curr_best = -1
     last_seed = -1
@@ -111,15 +110,22 @@ def fast_cascade(
 
     # this is basically BFS, except that the current layer only stores the nodes at
     # same distance from sources at each iteration
-    current_layer = list(seeds)
+    current_layer = nbt.List(seeds)
 
     while current_layer:
-        next_layer = nbt.List.empty_list(nb.int32)
-        for node in current_layer:
-            for child in range(starts[node], starts[min(node + 1, len(starts))]):
+        next_layer = nbt.List.empty_list(nb.int64)
 
-    #return -1
-                 # for child in adj_list[node]:
+        for node in current_layer:
+
+            range_end = edges.shape[0]
+            if node + 1 < starts.shape[0]:
+                range_end = starts[node + 1]
+
+            for i in range(starts[node], range_end):
+                child = edges[i]
+                print(child)
+                # return -1
+                # for child in adj_list[node]:
                 if child not in visited:
                     # Hardcoded threshhold activation
                     if np.random.random() <= 0.1:
@@ -133,8 +139,8 @@ def fast_cascade(
 
                     # if succ_prob <= data.get("act_prob", 0.1):
                     #    visited.add(child)
-                     #    current_layer.append(child)
+                    #    current_layer.append(child)
 
-         current_layer = next_layer
+        current_layer = next_layer
 
-    # return len(visited)
+    return len(visited)
