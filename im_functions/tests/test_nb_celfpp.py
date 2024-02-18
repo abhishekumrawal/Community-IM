@@ -14,4 +14,4 @@ def test_community_celf() -> None:
     k = 10
     test_graph = nx.fast_gnp_random_graph(n, p)
 
-    community_celf(test_graph, None, k)
+    community_celf(test_graph, k)

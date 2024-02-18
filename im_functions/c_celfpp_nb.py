@@ -8,6 +8,7 @@ import numpy as np
 
 
 def convert_to_csr(graph: nx.Graph | nx.DiGraph) -> list[list[int]]:
+    # TODO do better by fixed initial allocation
     node_mapping = {node: i for i, node in enumerate(graph.nodes())}
 
     starts = []
@@ -22,20 +23,20 @@ def convert_to_csr(graph: nx.Graph | nx.DiGraph) -> list[list[int]]:
     return np.array(starts), np.array(edges)
 
 
-def community_celf(
-    G: nx.Graph | nx.DiGraph, communities: list[list[int]], budget: int
-) -> list[int]:
+def community_celf(G: nx.Graph | nx.DiGraph, budget: int) -> list[int]:
+    # TODO add community parameter and get rid of graph one
     if not G.is_directed():
         G = G.to_directed()
 
     starts, edges = convert_to_csr(G)
+    community = set(G.nodes())
 
-    return _community_celf(starts, edges, [[0]], budget)
+    return _community_celf(starts, edges, community, budget)
 
 
-@nb.njit
+# @nb.njit
 def _community_celf(
-    starts: np.ndarray, edges: np.ndarray, communities: list[list[int]], budget: int
+    starts: np.ndarray, edges: np.ndarray, community: set[int], budget: int
 ) -> list[int]:
     seeds = {0}
     seeds.clear()
@@ -52,10 +53,11 @@ def _community_celf(
         if curr_best != -1:
             new_seeds.add(curr_best)
 
-        mg1 = 0  # fast_cascade(starts, edges, set(), new_seeds)
+        mg1 = fast_cascade(starts, edges, new_seeds, [0])
         curr_tup = (
             -mg1,
-            0,  # -fast_cascade(starts, edges, set(), new_seeds, [0]),
+            0,
+            -fast_cascade(starts, edges, new_seeds, [0]),
             curr_best,
             0,
             v,
@@ -66,7 +68,6 @@ def _community_celf(
             curr_best_val = mg1
             curr_best = v
 
-    """
     while len(seeds) < budget:
         mg1, mg2, prev_best, flag, u = hq.heappop(node_heap)
         mg1 = -mg1
@@ -92,12 +93,11 @@ def _community_celf(
             u,
         )
         hq.heappush(node_heap, curr_tup)
-        # curr_best = node_heap[0][-1]
+
         if mg1 > curr_best_val:
             curr_best_val = mg1
             curr_best = u
 
-    """
     return seeds
 
 
