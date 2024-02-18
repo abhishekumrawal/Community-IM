@@ -42,6 +42,7 @@ def _community_celf(
     seeds.clear()
 
     curr_best = -1
+    last_seed = -1
     curr_best_val = 0
 
     # Tuple in heap is (mg1, mg2, prev_best, flag, v)
@@ -60,13 +61,14 @@ def _community_celf(
             -fast_cascade(starts, edges, new_seeds, [0]),
             curr_best,
             0,
-            v,
         )
         hq.heappush(node_heap, curr_tup)
 
         if mg1 > curr_best_val:
             curr_best_val = mg1
             curr_best = v
+
+    return 0
 
     while len(seeds) < budget:
         mg1, mg2, prev_best, flag, u = hq.heappop(node_heap)
@@ -80,7 +82,7 @@ def _community_celf(
         elif prev_best == last_seed:
             mg1 = mg2
         else:
-            seed_val = fast_cascade(starts, edges, seeds)
+            seed_val = fast_cascade(starts, edges, seeds, [u])
             mg1 = fast_cascade(starts, edges, seeds, [u]) - seed_val
             mg2 = fast_cascade(starts, edges, seeds, [u])
 
@@ -112,10 +114,12 @@ def fast_cascade(
     current_layer = list(seeds)
 
     while current_layer:
-        next_layer = []
+        next_layer = nbt.List.empty_list(nb.int32)
         for node in current_layer:
             for child in range(starts[node], starts[min(node + 1, len(starts))]):
-                # for child in adj_list[node]:
+
+    #return -1
+                 # for child in adj_list[node]:
                 if child not in visited:
                     # Hardcoded threshhold activation
                     if np.random.random() <= 0.1:
@@ -129,8 +133,8 @@ def fast_cascade(
 
                     # if succ_prob <= data.get("act_prob", 0.1):
                     #    visited.add(child)
-                    #    current_layer.append(child)
+                     #    current_layer.append(child)
 
-        current_layer = next_layer
+         current_layer = next_layer
 
-    return len(visited)
+    # return len(visited)
