@@ -12,6 +12,8 @@ import timeit
 import networkx as nx
 import numpy as np
 from tqdm import tqdm
+from cynetdiff.utils import networkx_to_ic_model
+
 
 from im_functions.independent_cascade import independent_cascade
 from im_functions.linear_threshold import linear_threshold
@@ -21,6 +23,9 @@ def true_influence(inpt):
     # print('working')
     start = timeit.default_timer()
     network, seed_set, diffusion_model, n_sim, spontaneous_prob, name_id = inpt
+
+    if diffusion_model == "cynetdiff":
+        model = networkx_to_ic_model(network, activation_prob=0.2)
 
     nodes = list(nx.nodes(network))
     influence = 0
@@ -38,15 +43,22 @@ def true_influence(inpt):
                     spontaneously_infected.append(nodes[m])
 
             new_seeds = list(set(spontaneously_infected + new_seeds))
+        
+        if diffusion_model == "cynetdiff":
+            model.reset_model()
+            model.set_seeds(new_seeds)
+            model.advance_until_completion()
+            influence = influence + model.get_num_activated_nodes()
 
-        if diffusion_model == "independent_cascade":
-            layers = independent_cascade(network, new_seeds)
+        if diffusion_model == "independent_cascade" or diffusion_model == "linear_threshold":
+            if diffusion_model == "independent_cascade":
+                layers = independent_cascade(network, new_seeds)
 
-        elif diffusion_model == "linear_threshold":
-            layers = linear_threshold(network, new_seeds)
+            elif diffusion_model == "linear_threshold":
+                layers = linear_threshold(network, new_seeds)
 
-        for k in range(len(layers)):
-            influence = influence + len(layers[k])
+            for k in range(len(layers)):
+                influence = influence + len(layers[k])
 
     influence = influence / n_sim
 
