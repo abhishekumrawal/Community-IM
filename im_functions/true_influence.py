@@ -6,16 +6,13 @@ Created on Tue Mar 13 21:39:24 2018
 @author: abhishek.umrawal
 """
 
-import logging
 import timeit
 
 import networkx as nx
 import numpy as np
-from tqdm import tqdm
 from cynetdiff.utils import networkx_to_ic_model
+from tqdm import tqdm
 
-
-from im_functions.independent_cascade import independent_cascade
 from im_functions.linear_threshold import linear_threshold
 
 
@@ -25,6 +22,7 @@ def true_influence(inpt):
     model = None
     if diffusion_model == "independent_cascade":
         model = networkx_to_ic_model(network, activation_prob=0.2)
+        model.set_seeds(seed_set)
 
     nodes = list(nx.nodes(network))
     influence = 0
@@ -45,10 +43,10 @@ def true_influence(inpt):
 
         if diffusion_model == "independent_cascade":
             model.reset_model()
-            model.set_seeds(new_seeds)
             model.advance_until_completion()
             influence = influence + model.get_num_activated_nodes()
 
+        # TODO replace this with CyNetDiff also
         elif diffusion_model == "linear_threshold":
             layers = linear_threshold(network, new_seeds)
             for k in range(len(layers)):
