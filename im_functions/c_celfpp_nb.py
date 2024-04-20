@@ -7,13 +7,13 @@ import numba.typed as nbt
 import numpy as np
 
 
-def convert_to_csr(graph: nx.Graph | nx.DiGraph) -> list[list[int]]:
-    # TODO do better by fixed initial allocation
+def convert_to_csr(graph: nx.Graph | nx.DiGraph) -> tuple[np.ndarray, np.ndarray]:
     node_mapping = {node: i for i, node in enumerate(graph.nodes())}
 
     starts = []
     edges = []
     curr_start = 0
+
     for node in graph.nodes():
         starts.append(curr_start)
         for neighbor in graph.neighbors(node):
@@ -23,8 +23,8 @@ def convert_to_csr(graph: nx.Graph | nx.DiGraph) -> list[list[int]]:
     return np.array(starts), np.array(edges)
 
 
-def community_celf(G: nx.Graph | nx.DiGraph, budget: int) -> list[int]:
-    # TODO add community parameter and get rid of graph one
+def community_celf(G: nx.Graph | nx.DiGraph, budget: int) -> set[int]:
+
     if not G.is_directed():
         G = G.to_directed()
 
@@ -34,17 +34,15 @@ def community_celf(G: nx.Graph | nx.DiGraph, budget: int) -> list[int]:
     return _community_celf(starts, edges, community, budget)
 
 
-# @nb.njit
 def _community_celf(
     starts: np.ndarray, edges: np.ndarray, community: set[int], budget: int
-) -> list[int]:
+) -> set[int]:
     seeds = {0}
 
     curr_best = -1
     last_seed = -1
     curr_best_val = 0
 
-    # Tuple in heap is (mg1, mg2, prev_best, flag, v)
     node_heap: list[tuple[int, int, int, int, int]] = [(0, 0, curr_best, 0, 0)]
     hq.heappop(node_heap)
 
@@ -66,8 +64,6 @@ def _community_celf(
         if mg1 > curr_best_val:
             curr_best_val = mg1
             curr_best = v
-
-    return 0
 
     while len(seeds) < budget:
         mg1, mg2, prev_best, flag, u = hq.heappop(node_heap)
@@ -106,10 +102,8 @@ def _community_celf(
 def fast_cascade(
     starts: np.ndarray, edges: np.ndarray, seeds: set[int], new_nodes: list[int]
 ) -> int:
-    visited = set(seeds)
 
-    # this is basically BFS, except that the current layer only stores the nodes at
-    # same distance from sources at each iteration
+    visited = set(seeds)
     current_layer = nbt.List(seeds)
 
     while current_layer:
@@ -124,23 +118,10 @@ def fast_cascade(
             for i in range(starts[node], range_end):
                 child = edges[i]
                 print(child)
-                # return -1
-                # for child in adj_list[node]:
                 if child not in visited:
-                    # Hardcoded threshhold activation
                     if np.random.random() <= 0.1:
                         visited.add(child)
                         next_layer.append(child)
-                    # Lazy getter to deal with not having this set but still being
-                    # efficient
-                    # succ_prob = data.get("success_prob")
-                    # if succ_prob is None:
-                    #    succ_prob = random.random()
-
-                    # if succ_prob <= data.get("act_prob", 0.1):
-                    #    visited.add(child)
-                    #    current_layer.append(child)
-
         current_layer = next_layer
 
     return len(visited)

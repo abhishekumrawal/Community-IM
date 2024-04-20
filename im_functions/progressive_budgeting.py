@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jul  5 04:33:59 2020
-
-@author: abhishek.umrawal
-"""
-
 from collections import defaultdict
 
 import numpy as np

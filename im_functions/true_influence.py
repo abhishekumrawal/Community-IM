@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 13 21:39:24 2018
-
-@author: abhishek.umrawal
-"""
-
 import logging
 import timeit
 

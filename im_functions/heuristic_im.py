@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 12 18:29:52 2018
-
-@author: abhishek.umrawal
-"""
-
 import json
 import logging
 import os
@@ -32,41 +24,33 @@ def heuristic_im(
     n_sim=100,
     all_upto_budget=True,
 ):
-    "results folder"
     results_folder = "results/results_" + diffusion_model + "_" + weighting_scheme
 
-    "set a random seed"
     np.random.seed(int(random.uniform(0, 1000000)))
 
-    "set budget as number of nodes if the user gives a budget > number of nodes"
     budget = min(budget, len(network.nodes))
 
-    "initialize empty output lists"
     final_best_seed_sets = []
     final_exp_influences = []
 
-    "creating pickle files folder within the results folder"
     results_folder_pickle_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "pickle_files"
     )
     if not os.path.exists(results_folder_pickle_files):
         os.makedirs(results_folder_pickle_files)
 
-    "creating log files folder within the results folder"
     results_folder_log_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "log_files"
     )
     if not os.path.exists(results_folder_log_files):
         os.makedirs(results_folder_log_files)
 
-    "creating runtime files folder within the results folder"
     results_folder_runtime_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "runtime_files"
     )
     if not os.path.exists(results_folder_runtime_files):
         os.makedirs(results_folder_runtime_files)
 
-    "calling the chosen heuristic method"
     if heuristic == "degree":
         start = timeit.default_timer()
         best_seed_set = degree_im(network, budget)
@@ -85,16 +69,13 @@ def heuristic_im(
         "Time taken by " + heuristic + " is " + str(round(runtime, 2)) + " seconds."
     )
 
-    "saving runtime info to a text file"
     runtime_info = {heuristic: runtime}
     fstr = results_folder_runtime_files + os.sep + "runtime_info_" + heuristic + ".txt"
     with open(fstr, "w") as f:
         f.write(json.dumps(runtime_info))
 
-    "generating nested final best seed sets"
     final_best_seed_sets = [best_seed_set[: k + 1] for k, _ in enumerate(best_seed_set)]
 
-    "saving results"
     if all_upto_budget == True:
         results = {
             "budget": budget,
