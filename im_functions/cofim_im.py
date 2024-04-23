@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 21 21:30:04 2019
+
+@author: abhishek.umrawal
+"""
+
 import json
 import logging
 import os
@@ -24,12 +32,16 @@ def cofim_im(
     community_size_threshold=0.01,
     all_upto_budget=True,
 ):
+    # results folder
     results_folder = "results/results_" + diffusion_model + "_" + weighting_scheme
 
+    # initialize the run_time info dictionary
     runtime_info = {}
 
+    # set a random seed
     np.random.seed(int(random.uniform(0, 1000000)))
 
+    # creating a copy of the cofim_folder
     cofim_folder = "./cofim_code_release"
 
     if not os.path.exists(cofim_folder + "_copies"):
@@ -50,26 +62,36 @@ def cofim_im(
         shutil.rmtree(cofim_folder_new)
     shutil.copytree(cofim_folder, cofim_folder_new)
 
+    # set budget as len(network.nodes) if the budget > len(network.nodes)
     budget = min(budget, len(network.nodes))
 
+    # creating pickle files folder within the results folder
     results_folder_pickle_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "pickle_files"
     )
     if not os.path.exists(results_folder_pickle_files):
         os.makedirs(results_folder_pickle_files)
 
+    # creating log files folder within the results folder
     results_folder_log_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "log_files"
     )
     if not os.path.exists(results_folder_log_files):
         os.makedirs(results_folder_log_files)
 
+    # creating runtime files folder within the results folder
     results_folder_runtime_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "runtime_files"
     )
     if not os.path.exists(results_folder_runtime_files):
         os.makedirs(results_folder_runtime_files)
 
+    # Generating input for CoFIM software
+    ## saving the network as an adjacency list in a text file
+    ## saving communities as one community per line in a text file
+    ## saving the network as an adjacency list in a text file
+
+    # saving network as an edge list in a text file
     network = nx.convert_node_labels_to_integers(network, first_label=0)
     nx.write_edgelist(
         network,
@@ -78,12 +100,16 @@ def cofim_im(
         data=False,
     )
 
+    # creating content for the first line as number of nodes and number of edges
     first_line = str(len(network.nodes())) + "\t" + str(len(network.edges()))
 
+    # opening and reading the edge list file and prepending the first line content and then closing the file
     with open(cofim_folder_new + os.sep + network.name[1:] + ".txt", "r+") as f:
         existing_content = f.read()
         f.seek(0, 0)
         f.write(first_line.rstrip("\r\n") + "\n" + existing_content)
+
+    ## saving communities as one community per line in a text file
 
     communities_relabeled = []
     for community in communities:
@@ -91,6 +117,7 @@ def cofim_im(
         communities_relabeled.append(community_relabeled)
     communities = communities_relabeled
 
+    # community detection
     if communities == []:
         logging.info(
             "Part 1: Detecting communities using " + community_method + " method."
@@ -108,6 +135,7 @@ def cofim_im(
         runtime_info["community_detection"] = 0
         logging.info("Time taken in community detection is " + str(0) + " seconds.")
 
+    # community statistics
     num_communities = len(communities)
     sizes_communities = [len(community) for community in communities]
     is_valid_partition = is_partition(network, communities)
@@ -124,6 +152,7 @@ def cofim_im(
     # logging.info('Performance of the partition: ' + str(performance_score)+'.')
     logging.info("Modularity of the partition is " + str(modularity_score) + ".")
 
+    # finding small communities and merging them together
     small_communities = [
         community
         for community in communities
@@ -166,8 +195,10 @@ def cofim_im(
         + "."
     )
 
+    # using new communities as the final communities for the next step
     communities = new_communities
 
+    # saving communities as one community per line in a text file
     try:
         os.remove(cofim_folder_new + os.sep + network.name[1:] + "_com.txt")
     except OSError:
@@ -179,9 +210,13 @@ def cofim_im(
             commmunity_string = "\t".join(map(str, community))
             outfile.write("{}\n".format(commmunity_string))
 
+    ### Running CoFIM software which is written in C and saving the outputs
+    #### Changing directory to the Goyal's software folder, compiling the C codes by doing make
+
     os.chdir(cofim_folder_new)
     os.system("make")
 
+    ##### Calling CoFIM
     start = timeit.default_timer()
     network_file = network.name[1:] + ".txt"
     network_com_file = network.name[1:] + "_com.txt"
@@ -204,20 +239,25 @@ def cofim_im(
     end = timeit.default_timer()
     runtime = end - start
 
+    # reading the output file
     output = (
         open(output_file).read().strip().split("time(s)")[1].strip().split("\n")[:-4]
     )
 
+    # creating a list with the best seed set
     best_seed_set = [int(item.split("\t")[1]) for item in output]
 
+    # writing best seed set to a text file
     seeds_textfile = open(best_seed_set_file, "w")
     for element in best_seed_set:
         seeds_textfile.write(str(element) + "\n")
     seeds_textfile.close()
 
+    #### Changing the directory back to earlier
     os.chdir("..")
     os.chdir("..")
 
+    ##### Saving runtime info to a text file
     runtime_info["cofimwc"] = runtime
     runtime_info["cofim"] = (
         runtime_info["community_detection"] + runtime_info["cofimwc"]
@@ -226,6 +266,7 @@ def cofim_im(
     with open(fstr, "w") as f:
         f.write(json.dumps(runtime_info))
 
+    # saving results
     best_seed_set = [item + 1 for item in best_seed_set]
     final_best_seed_sets = [best_seed_set[0 : k + 1] for k in range(0, budget)]
     final_exp_influences = []
