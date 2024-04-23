@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 21 17:37:20 2019
+
+@author: cjquinn
+"""
+
 import copy
 import os
 import random
@@ -20,6 +28,7 @@ from networkx.algorithms.community import (
 def community_detection(network, method="louvain"):
     random.seed(0)
 
+    # flow-based community detection
     if method == "infomap":
         # writing the given network as a .net file
         nx.write_pajek(network, "infomap_input/network.net")
@@ -45,21 +54,27 @@ def community_detection(network, method="louvain"):
                 [nodes[i] for i, x in enumerate(community_labels) if x == label]
             )
 
+    # modularity based community detection
     if method == "louvain":
-        # print(list(network.nodes))
-        G = ig.Graph.from_networkx(network)  # use G.vs for vertices and G.es for edges
+        # copy the given network from newtorkx object to an igraph object
+        # all edge attributes like direction and weight are preserved
+        # use G.vs for vertices and G.es for edges
+        G = ig.Graph.from_networkx(network)
 
         part = louvain.find_partition(
             G, louvain.ModularityVertexPartition, weights="act_prob"
         )
         communities_igraph_lables = list(part)
 
+        # setting communities node lables same as that in the networkx object
         communities = copy.deepcopy(communities_igraph_lables)
         for i, com in enumerate(communities_igraph_lables):
             for j, num in enumerate(com):
                 communities[i][j] = G.vs(num)["_nx_name"][0]
 
     if method == "leiden":
+        # copy the given network from newtorkx object to an igraph object
+        # all edge attributes like direction and weight are preserved
         # use G.vs for vertices and G.es for edges
         G = ig.Graph.from_networkx(network)
 
@@ -68,6 +83,7 @@ def community_detection(network, method="louvain"):
         )
         communities_igraph_lables = list(part)
 
+        # setting communities node lables same as that in the networkx object
         communities = copy.deepcopy(communities_igraph_lables)
         for i, com in enumerate(communities_igraph_lables):
             for j, num in enumerate(com):
@@ -77,6 +93,7 @@ def community_detection(network, method="louvain"):
         part = greedy_modularity_communities(network, weight="act_prob")
         communities = [list(item) for item in part]
 
+    # semi-supervised learning-based community detection
     if method == "label_propagation":
         part = label_propagation_communities(nx.Graph(network))
         communities = [list(item) for item in part]
