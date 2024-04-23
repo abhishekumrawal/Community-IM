@@ -1,6 +1,5 @@
 import copy
 import random
-from collections import deque
 
 import networkx as nx
 
@@ -10,42 +9,43 @@ __all__ = ["independent_cascade"]
 def independent_cascade(
     G, seeds, *, steps=0, random_seed=None, fast_impl: bool = True
 ) -> list[list[int]]:
- """Return the active nodes of each diffusion step by the independent cascade model
+    """Return the active nodes of each diffusion step by the independent cascade model
 
-  Parameters
-  -----------
-  G : graph
-    A NetworkX graph
-  seeds : list of nodes
-    The seed nodes for diffusion
-  steps: integer
-    The number of steps to diffuse.  If steps <= 0, the diffusion runs until
-    no more nodes can be activated.  If steps > 0, the diffusion runs for at
-    most "steps" rounds
+    Parameters
+    -----------
+    G : graph
+        A NetworkX graph
+    seeds : list of nodes
+        The seed nodes for diffusion
+    steps: integer
+        The number of steps to diffuse.  If steps <= 0, the diffusion runs until
+        no more nodes can be activated.  If steps > 0, the diffusion runs for at
+        most "steps" rounds
 
-  Returns
-  -------
-  layer_i_nodes : list of list of activated nodes
-    layer_i_nodes[0]: the seeds
-    layer_i_nodes[k]: the nodes activated at the kth diffusion step
+    Returns
+    -------
+    layer_i_nodes : list of list of activated nodes
+        layer_i_nodes[0]: the seeds
+        layer_i_nodes[k]: the nodes activated at the kth diffusion step
 
-  Notes
-  -----
-  When node v in G becomes active, it has a *single* chance of activating
-  each currently inactive neighbor w with probability p_{vw}
+    Notes
+    -----
+    When node v in G becomes active, it has a *single* chance of activating
+    each currently inactive neighbor w with probability p_{vw}
 
-  Examples
-  --------
-  DG = nx.DiGraph()
-  DG.add_edges_from([(1,2), (1,3), (1,5), (2,1), (3,2), (4,2), (4,3), (4,6), (5,3), (5,4), (5,6), (6,4), (6,5)], act_prob=0.2)
-  layers = networkx_addon.information_propagation.independent_cascade(DG, [6])
+    Examples
+    --------
+    DG = nx.DiGraph()
+    DG.add_edges_from([(1,2), (1,3), (1,5), (2,1), (3,2), (4,2), (4,3), (4,6), (5,3), (5,4), (5,6), (6,4), (6,5)], act_prob=0.2)
+    layers = networkx_addon.information_propagation.independent_cascade(DG, [6])
 
-  References
-  ----------
-  [1] David Kempe, Jon Kleinberg, and Eva Tardos.
-      Influential nodes in a diffusion model for social networks.
-      In Automata, Languages and Programming, 2005.
-  """
+    References
+    ----------
+    [1] David Kempe, Jon Kleinberg, and Eva Tardos.
+        Influential nodes in a diffusion model for social networks.
+        In Automata, Languages and Programming, 2005.
+    """
+
     if type(G) == nx.MultiGraph or type(G) == nx.MultiDiGraph:
         raise Exception(
             "independent_cascade() is not defined for graphs with multiedges."
