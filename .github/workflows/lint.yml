@@ -5,7 +5,8 @@ name: lint
 
 on:
   push:
-    branches: ["*"]
+    branches:
+      - main
   pull_request:
     branches: ["*"]
 
@@ -36,5 +37,5 @@ jobs:
       - name: Run mypy
         run: poetry run mypy .
 
-      - name: Run flake8
-        run: poetry run flake8 .
+      - name: Run ruff
+        run: poetry run ruff check .
