@@ -12,15 +12,6 @@ module = [
 ]
 ignore_missing_imports = true
 
-[tool.flake8]
-# Black compatibility
-max-line-length = 88
-extend-ignore = ["E203", "W503"]
-
-# Per <https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#profile>
-[tool.isort]
-profile = "black"
-
 [tool.poetry]
 name = "community-im"
 version = "0.1.0"
@@ -30,12 +21,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-black = "23.3.0"
-flake8 = "6.0.0"
-flake8-black = "0.3.6"
-flake8-isort = "6.0.0"
-flake8-pyproject = "1.2.3"
-isort = "5.10.1"
+ruff = "^0.4.1"
 mypy = "1.1.1"
 networkx = "^3.2.1"
 pandas-stubs = "2.1.1.230928"

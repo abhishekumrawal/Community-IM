@@ -21,7 +21,6 @@ def main_compilation(
     import pickle as pickle
 
     # matplotlib
-    import matplotlib
     import matplotlib.pyplot as plt
     import pandas as pd
 

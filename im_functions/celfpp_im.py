@@ -71,7 +71,6 @@ def celfpp_im(
     if not os.path.exists(results_folder_runtime_files):
         os.makedirs(results_folder_runtime_files)
 
-
     act_prob = []
     for edge in network.edges():
         act_prob.append(network[edge[0]][edge[1]]["act_prob"])
@@ -82,7 +81,6 @@ def celfpp_im(
     graph.to_csv(
         celfpp_folder_new + "/datasets/graph.inf", sep=" ", index=False, header=True
     )
-
 
     input_file = celfpp_folder_new + "/config_test.txt"
     config_test = open(input_file).read().strip()

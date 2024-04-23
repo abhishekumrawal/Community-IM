@@ -3,6 +3,7 @@
 """
 @author: abhishek.umrawal
 """
+
 from im_functions.true_influence import true_influence
 import networkx as nx
 import numpy as np
@@ -14,8 +15,10 @@ import pickle
 import logging
 from multiprocessing import Pool
 
-def genetic_im(network, weighting_scheme, budget, diffusion_model, n_sim, all_upto_budget=True):
 
+def genetic_im(
+    network, weighting_scheme, budget, diffusion_model, n_sim, all_upto_budget=True
+):
     """
     Genetic Algorithm for finding the best seed set of a user-specified budget
 
@@ -39,51 +42,60 @@ def genetic_im(network, weighting_scheme, budget, diffusion_model, n_sim, all_up
         - max_influence is the value of maximum influence
 
     """
-    results_folder = 'results/results_'+diffusion_model+'_'+weighting_scheme
+    results_folder = "results/results_" + diffusion_model + "_" + weighting_scheme
 
     np.random.seed(int(random.uniform(0, 1000000)))
 
-    budget = min(budget,len(network.nodes))
+    budget = min(budget, len(network.nodes))
 
-    results_folder_pickle_files = results_folder+os.sep+'results'+network.name+os.sep+'pickle_files'
+    results_folder_pickle_files = (
+        results_folder + os.sep + "results" + network.name + os.sep + "pickle_files"
+    )
     if not os.path.exists(results_folder_pickle_files):
         os.makedirs(results_folder_pickle_files)
 
-    results_folder_log_files = results_folder+os.sep+'results'+network.name+os.sep+'log_files'
+    results_folder_log_files = (
+        results_folder + os.sep + "results" + network.name + os.sep + "log_files"
+    )
     if not os.path.exists(results_folder_log_files):
         os.makedirs(results_folder_log_files)
 
-    results_folder_runtime_files = results_folder+os.sep+'results'+network.name+os.sep+'runtime_files'
+    results_folder_runtime_files = (
+        results_folder + os.sep + "results" + network.name + os.sep + "runtime_files"
+    )
     if not os.path.exists(results_folder_runtime_files):
         os.makedirs(results_folder_runtime_files)
 
     start = timeit.default_timer()
-    print('pruning based on centrality measures')
-    print('calculating betweenness')
+    print("pruning based on centrality measures")
+    print("calculating betweenness")
     betweenness_list = list(nx.betweenness_centrality(network).values())
-    print('calculating closeness')
+    print("calculating closeness")
     closeness_list = list(nx.closeness_centrality(network).values())
-    #katz_list = list(nx.katz_centrality(network).values())
+    # katz_list = list(nx.katz_centrality(network).values())
 
-    #ranked_nodes = [x+1 for x in np.argsort([-sum(x) for x in zip(betweenness_list, closeness_list, katz_list)])]
-    ranked_nodes = [x+1 for x in np.argsort([-sum(x) for x in zip(betweenness_list, closeness_list)])]
+    # ranked_nodes = [x+1 for x in np.argsort([-sum(x) for x in zip(betweenness_list, closeness_list, katz_list)])]
+    ranked_nodes = [
+        x + 1
+        for x in np.argsort([-sum(x) for x in zip(betweenness_list, closeness_list)])
+    ]
 
     num_nodes = len(network.nodes)
     prop = 0.50
 
-    nodes_after_pruning = ranked_nodes[:int(prop*num_nodes)]
+    nodes_after_pruning = ranked_nodes[: int(prop * num_nodes)]
 
     influence_dict = {}
     pop_size = 100
-    #max_iter_multiplier = 100
-    #lam = 1
+    # max_iter_multiplier = 100
+    # lam = 1
     p_mut = 0.3
     crossover = True
     n_sim = 100
     budget_interval = 20
 
     if all_upto_budget == True:
-        budgets = [1] + list(range(budget_interval,budget+1,budget_interval))
+        budgets = [1] + list(range(budget_interval, budget + 1, budget_interval))
     else:
         budgets = [budget]
 
@@ -91,11 +103,10 @@ def genetic_im(network, weighting_scheme, budget, diffusion_model, n_sim, all_up
     max_influences = []
     runtime_info = {}
     for b in budgets:
-
-        print('budget: '+str(b))
-        #max iterations
-        max_iter = 10 #max_iter_multiplier*budget
-        #print(max_iter)
+        print("budget: " + str(b))
+        # max iterations
+        max_iter = 10  # max_iter_multiplier*budget
+        # print(max_iter)
 
         # list of nodes
         nodes = nodes_after_pruning
@@ -104,29 +115,31 @@ def genetic_im(network, weighting_scheme, budget, diffusion_model, n_sim, all_up
         best_seed_set = []
         max_influence = []
 
-        #number of vertices in the network
+        # number of vertices in the network
         n = len(nodes_after_pruning)
 
-        #initializing a population of size pop_size
-        A = np.zeros((pop_size,n))
+        # initializing a population of size pop_size
+        A = np.zeros((pop_size, n))
         for i in range(len(A)):
-            A[i][list(np.random.choice(n,b,replace=True))] = 1
-        #print(A.sum(1))
+            A[i][list(np.random.choice(n, b, replace=True))] = 1
+        # print(A.sum(1))
 
-        #initializing the fitness variable
+        # initializing the fitness variable
         f = np.zeros(len(A))
 
-        #initializing the selection probabilities
+        # initializing the selection probabilities
         prob = np.zeros(len(A))
 
         for t in range(max_iter):
-            print('max iteration: '+str(max_iter)+', current iteration: '+str(t+1))
+            print(
+                "max iteration: " + str(max_iter) + ", current iteration: " + str(t + 1)
+            )
 
-            #calcuating fitness for every candidate in the population
-            #which is not already in influence_dict"
-            #print('fitness calculation ...')
+            # calcuating fitness for every candidate in the population
+            # which is not already in influence_dict"
+            # print('fitness calculation ...')
 
-            inputs  = []
+            inputs = []
             keys = []
 
             for i in range(len(A)):
@@ -140,63 +153,68 @@ def genetic_im(network, weighting_scheme, budget, diffusion_model, n_sim, all_up
             pool.close()
             pool.join()
 
-            #updating the influence_dict for new keys from above"
+            # updating the influence_dict for new keys from above"
             influence_values = [val_pair[1] for val_pair in influence_values_pairs]
-            influence_dict_temp = dict(zip(keys,influence_values))
+            influence_dict_temp = dict(zip(keys, influence_values))
             influence_dict.update(influence_dict_temp)
 
-            #looking up fitness for every candidate in the population"
-            #in influence_dict"
+            # looking up fitness for every candidate in the population"
+            # in influence_dict"
             for i in range(len(A)):
                 seed_set = [nodes[k] for k in list(np.where(A[i] == 1)[0])]
                 f[i] = influence_dict[tuple(seed_set)]
 
-            #finding current best seed set and the max influence
-            best_seed_set = [nodes[k] for k in [j for j, x in enumerate(A[np.argmax(f)]) if x == 1]]
+            # finding current best seed set and the max influence
+            best_seed_set = [
+                nodes[k] for k in [j for j, x in enumerate(A[np.argmax(f)]) if x == 1]
+            ]
             max_influence = influence_dict[tuple(best_seed_set)]
 
-            #reproduction
-            #prob = np.round(np.exp(lam * (f))/(np.sum(np.exp(lam * (f)))),20)
+            # reproduction
+            # prob = np.round(np.exp(lam * (f))/(np.sum(np.exp(lam * (f)))),20)
             sumf = sum(f)
-            prob = [val/sumf for val in f]
-            #print(prob)
+            prob = [val / sumf for val in f]
+            # print(prob)
 
             for i in range(len(A)):
-                A[i] = A[np.random.choice(len(A),p=prob)]
+                A[i] = A[np.random.choice(len(A), p=prob)]
 
-            #crossover
+            # crossover
             if crossover == True:
-
-                #top two in A
+                # top two in A
                 top_two = A[np.argsort([-x for x in f])[0:2]]
 
-                #nodes in top two
+                # nodes in top two
                 nodes_top_1 = [nodes[k] for k in list(np.where(top_two[0] == 1)[0])]
                 nodes_top_2 = [nodes[k] for k in list(np.where(top_two[1] == 1)[0])]
 
-                #merged and sorted nodes
+                # merged and sorted nodes
                 merged_and_sorted = sorted(nodes_top_1 + nodes_top_2)
 
-                #offsprings
-                offspring1 = [x for i,x in enumerate(merged_and_sorted) if i % 2 == 0]
-                offspring2 = [x for i,x in enumerate(merged_and_sorted) if i % 2 != 0]
+                # offsprings
+                offspring1 = [x for i, x in enumerate(merged_and_sorted) if i % 2 == 0]
+                offspring2 = [x for i, x in enumerate(merged_and_sorted) if i % 2 != 0]
 
-                #row for A for offspring 1
-                A_offspring1 = [0]*n
+                # row for A for offspring 1
+                A_offspring1 = [0] * n
                 for node in offspring1:
                     loc = nodes_after_pruning.index(node)
-                    A_offspring1[loc-1] = 1
+                    A_offspring1[loc - 1] = 1
 
-                #row for A for offspring 2
-                A_offspring2 = [0]*n
+                # row for A for offspring 2
+                A_offspring2 = [0] * n
                 for node in offspring2:
                     loc = nodes_after_pruning.index(node)
-                    A_offspring2[loc-1] = 1
+                    A_offspring2[loc - 1] = 1
 
-                #updating_population
-                A[np.random.choice(np.argsort(f)[len(f)-10:len(f)],2,replace=False)] = np.vstack((np.array(A_offspring1),np.array(A_offspring2)))
+                # updating_population
+                A[
+                    np.random.choice(
+                        np.argsort(f)[len(f) - 10 : len(f)], 2, replace=False
+                    )
+                ] = np.vstack((np.array(A_offspring1), np.array(A_offspring2)))
 
-            #mutation
+            # mutation
             for i in range(len(A)):
                 if np.random.rand() < p_mut:
                     one_locs = list(np.where(A[i] == 1)[0])
@@ -205,7 +223,6 @@ def genetic_im(network, weighting_scheme, budget, diffusion_model, n_sim, all_up
                     A[i][np.random.choice(one_locs)] = 0
                     A[i][np.random.choice(zero_locs)] = 1
 
-
         best_seed_sets.append(best_seed_set)
         max_influences.append(max_influence)
 
@@ -213,45 +230,72 @@ def genetic_im(network, weighting_scheme, budget, diffusion_model, n_sim, all_up
         runtime = end - start
 
         runtime_info[b] = runtime
-        fstr = results_folder_runtime_files+os.sep+'runtime_info_genetic.txt'
-        with open(fstr, 'w') as f:
+        fstr = results_folder_runtime_files + os.sep + "runtime_info_genetic.txt"
+        with open(fstr, "w") as f:
             f.write(json.dumps(runtime_info))
 
-    best_seed_sets1 = [[None]]*budget
-    for i,j in enumerate(budgets):
-        best_seed_sets1[j-1] = best_seed_sets[i]
+    best_seed_sets1 = [[None]] * budget
+    for i, j in enumerate(budgets):
+        best_seed_sets1[j - 1] = best_seed_sets[i]
 
-    max_influences1 = [0]*budget
-    for i,j in enumerate(budgets):
-        max_influences1[j-1] = max_influences[i]
+    max_influences1 = [0] * budget
+    for i, j in enumerate(budgets):
+        max_influences1[j - 1] = max_influences[i]
 
     if all_upto_budget == True:
-        results = {'budget':budget, 'diffusion_model':diffusion_model, 'algorithm':'genetic', 'n_sim':n_sim, \
-                   'best_seed_set':[[None]] + best_seed_sets1,\
-                       'network_name':network.name, 'exp_influence':[0] + max_influences1}
+        results = {
+            "budget": budget,
+            "diffusion_model": diffusion_model,
+            "algorithm": "genetic",
+            "n_sim": n_sim,
+            "best_seed_set": [[None]] + best_seed_sets1,
+            "network_name": network.name,
+            "exp_influence": [0] + max_influences1,
+        }
 
-        fstr = results_folder_pickle_files+os.sep+'output_genetic__%i__.pkl'%(budget)
-        with open(fstr,'wb') as f:
+        fstr = (
+            results_folder_pickle_files + os.sep + "output_genetic__%i__.pkl" % (budget)
+        )
+        with open(fstr, "wb") as f:
             pickle.dump(results, f)
 
-        logging.info('The final solution is as follows.')
+        logging.info("The final solution is as follows.")
         logging.info(str([[None]] + best_seed_sets1))
         logging.info(str([0] + max_influences1))
-        logging.info('Total time taken by Genetic-IM is '+' '+str(round(runtime,2))+' seconds.')
+        logging.info(
+            "Total time taken by Genetic-IM is "
+            + " "
+            + str(round(runtime, 2))
+            + " seconds."
+        )
 
         return [[None]] + best_seed_sets1, [0] + max_influences1, runtime
 
     else:
-        results = {'budget':budget, 'diffusion_model':diffusion_model, 'algorithm':'genetic', 'n_sim':n_sim, \
-                   'best_seed_set':best_seed_sets1[-1], 'network_name':network.name, 'exp_influence':max_influences1[-1]}
+        results = {
+            "budget": budget,
+            "diffusion_model": diffusion_model,
+            "algorithm": "genetic",
+            "n_sim": n_sim,
+            "best_seed_set": best_seed_sets1[-1],
+            "network_name": network.name,
+            "exp_influence": max_influences1[-1],
+        }
 
-        fstr = results_folder_pickle_files+os.sep+'output_genetic__%i__.pkl'%(budget)
-        with open(fstr,'wb') as f:
+        fstr = (
+            results_folder_pickle_files + os.sep + "output_genetic__%i__.pkl" % (budget)
+        )
+        with open(fstr, "wb") as f:
             pickle.dump(results, f)
 
-        logging.info('The final solution is as follows.')
+        logging.info("The final solution is as follows.")
         logging.info(str(best_seed_sets1[-1]))
         logging.info(max_influences1[-1])
-        logging.info('Total time taken by Genetic-IM is '+' '+str(round(runtime,2))+' seconds.')
+        logging.info(
+            "Total time taken by Genetic-IM is "
+            + " "
+            + str(round(runtime, 2))
+            + " seconds."
+        )
 
         return best_seed_sets1[-1], max_influences1[-1], runtime

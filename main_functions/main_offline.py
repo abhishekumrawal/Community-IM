@@ -6,7 +6,6 @@ Created on Fri Feb 15 19:17:14 2019
 @author: abhishek.umrawal
 """
 
-
 # importing required built-in modules
 import itertools
 import logging

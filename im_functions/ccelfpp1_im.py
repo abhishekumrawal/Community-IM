@@ -37,17 +37,23 @@ def ccelfpp1_im(
     final_best_seed_sets = []
     final_exp_influences = []
 
-    results_folder_pickle_files = (results_folder + os.sep + "results" + network.name + os.sep + "pickle_files")
+    results_folder_pickle_files = (
+        results_folder + os.sep + "results" + network.name + os.sep + "pickle_files"
+    )
 
     if not os.path.exists(results_folder_pickle_files):
         os.makedirs(results_folder_pickle_files)
 
-    results_folder_log_files = (results_folder + os.sep + "results" + network.name + os.sep + "log_files")
+    results_folder_log_files = (
+        results_folder + os.sep + "results" + network.name + os.sep + "log_files"
+    )
 
     if not os.path.exists(results_folder_log_files):
         os.makedirs(results_folder_log_files)
 
-    results_folder_runtime_files = (results_folder + os.sep + "results" + network.name + os.sep + "runtime_files")
+    results_folder_runtime_files = (
+        results_folder + os.sep + "results" + network.name + os.sep + "runtime_files"
+    )
 
     if not os.path.exists(results_folder_runtime_files):
         os.makedirs(results_folder_runtime_files)
@@ -136,9 +142,7 @@ def ccelfpp1_im(
     for i, community in enumerate(communities):
         starti = timeit.default_timer()
         logging.info("Community-CELF++ is working on community " + str(i) + ".")
-        sub_network = network.subgraph(
-            community
-        ).copy()
+        sub_network = network.subgraph(community).copy()
         sub_network.name = network.name + "_community_" + str(i)
         budget_for_greedy = min(len(sub_network.nodes), budget)
         best_seed_set, exp_influence, runtime = celfpp_im(

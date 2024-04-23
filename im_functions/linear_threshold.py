@@ -11,42 +11,42 @@ __all__ = ["linear_threshold"]
 def linear_threshold(G, seeds, steps=0):
     """Return the active nodes of each diffusion step by linear threshold model
 
-  Parameters
-  ----------
-  G : networkx graph
-      The number of nodes.
+    Parameters
+    ----------
+    G : networkx graph
+        The number of nodes.
 
-  seeds: list of nodes
-      The seed nodes of the graph
+    seeds: list of nodes
+        The seed nodes of the graph
 
-  steps: int
-      The number of steps to diffuse
-      When steps <= 0, the model diffuses until no more nodes
-      can be activated
+    steps: int
+        The number of steps to diffuse
+        When steps <= 0, the model diffuses until no more nodes
+        can be activated
 
-  Return
-  ------
-  layer_i_nodes : list of list of activated nodes
-    layer_i_nodes[0]: the seeds
-    layer_i_nodes[k]: the nodes activated at the kth diffusion step
+    Return
+    ------
+    layer_i_nodes : list of list of activated nodes
+      layer_i_nodes[0]: the seeds
+      layer_i_nodes[k]: the nodes activated at the kth diffusion step
 
-  Notes
-  -----
-  1. Each edge is supposed to have an attribute "influence".  If not, the
-     default value is given (1/in_degree)
+    Notes
+    -----
+    1. Each edge is supposed to have an attribute "influence".  If not, the
+       default value is given (1/in_degree)
 
-  References
-  ----------
-  [1] GranovetterMark. Threshold models of collective behavior.
-      The American journal of sociology, 1978.
+    References
+    ----------
+    [1] GranovetterMark. Threshold models of collective behavior.
+        The American journal of sociology, 1978.
 
-  Examples
-  --------
-  DG = nx.DiGraph()
-  DG.add_edges_from([(1,2), (1,3), (1,5), (2,1), (3,2), (4,2), (4,3),(4,6), (5,3), (5,4), (5,6), (6,4), (6,5)])
-  layers = networkx_addon.information_propagation.linear_threshold(DG, [1])
+    Examples
+    --------
+    DG = nx.DiGraph()
+    DG.add_edges_from([(1,2), (1,3), (1,5), (2,1), (3,2), (4,2), (4,3),(4,6), (5,3), (5,4), (5,6), (6,4), (6,5)])
+    layers = networkx_addon.information_propagation.linear_threshold(DG, [1])
 
-  """
+    """
     if type(G) == nx.MultiGraph or type(G) == nx.MultiDiGraph:
         raise Exception("linear_threshold() is not defined for graphs with multiedges.")
 

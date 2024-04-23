@@ -1,4 +1,3 @@
-import copy
 import json
 import logging
 import os
@@ -85,7 +84,6 @@ def cofim_im(
         existing_content = f.read()
         f.seek(0, 0)
         f.write(first_line.rstrip("\r\n") + "\n" + existing_content)
-
 
     communities_relabeled = []
     for community in communities:

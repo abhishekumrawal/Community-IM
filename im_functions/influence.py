@@ -3,11 +3,10 @@ import numpy as np
 
 from cynetdiff.utils import networkx_to_ic_model
 
-from im_functions.independent_cascade import independent_cascade
 from im_functions.linear_threshold import linear_threshold
 
-def influence(network, seed_set, diffusion_model, spontaneous_prob = []):
 
+def influence(network, seed_set, diffusion_model, spontaneous_prob=[]):
     nodes = list(nx.nodes(network))
     spontaneously_infected = []
     influence = 0
