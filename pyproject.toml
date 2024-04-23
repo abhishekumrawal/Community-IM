@@ -54,7 +54,7 @@ tikzplotlib = "^0.10.1"
 types-tqdm = "^4.66.0.5"
 tqdm = "^4.66.1"
 setuptools = "^69.0.3"
-numba = "^0.59.0"
+cynetdiff = "^0.1.9"
 
 
 [build-system]
