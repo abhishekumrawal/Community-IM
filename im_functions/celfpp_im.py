@@ -6,7 +6,7 @@ Created on Tue May 21 21:30:04 2019
 @author: abhishek.umrawal
 """
 
-# importing required built-in modules"
+# importing required built-in modules
 import json
 import logging
 import os
@@ -27,10 +27,13 @@ def celfpp_im(
     n_sim: int = 100,
     all_upto_budget: bool = True,
 ):
+    # results folder
     results_folder = "results/results_" + diffusion_model + "_" + weighting_scheme
 
+    # set a random seed
     np.random.seed(int(random.uniform(0, 1000000)))
 
+    # creating a copy of the celfpp_folder
     celfpp_folder = "./celf++_code_release"
 
     if not os.path.exists(celfpp_folder + "_copies"):
@@ -51,30 +54,38 @@ def celfpp_im(
         shutil.rmtree(celfpp_folder_new)
     shutil.copytree(celfpp_folder, celfpp_folder_new)
 
+    # set budget as len(network.nodes) if the budget > len(network.nodes)
     budget = min(budget, len(network.nodes))
 
+    # creating pickle files folder within the results folder
     results_folder_pickle_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "pickle_files"
     )
     if not os.path.exists(results_folder_pickle_files):
         os.makedirs(results_folder_pickle_files)
 
+    # creating log files folder within the results folder
     results_folder_log_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "log_files"
     )
     if not os.path.exists(results_folder_log_files):
         os.makedirs(results_folder_log_files)
 
+    # creating runtime files folder within the results folder
     results_folder_runtime_files = (
         results_folder + os.sep + "results" + network.name + os.sep + "runtime_files"
     )
     if not os.path.exists(results_folder_runtime_files):
         os.makedirs(results_folder_runtime_files)
 
+    # Generating input for Goyal's software, i.e.
+    ##Taking out weights from the weighted network
+
     act_prob = []
     for edge in network.edges():
         act_prob.append(network[edge[0]][edge[1]]["act_prob"])
 
+    ## Saving the weighted edge list as an inf file
     edge_list = pd.DataFrame(list(network.edges), columns=["from", "to"])
     graph = edge_list.copy(deep=True)
     graph["act_prob"] = act_prob
@@ -82,9 +93,14 @@ def celfpp_im(
         celfpp_folder_new + "/datasets/graph.inf", sep=" ", index=False, header=True
     )
 
+    ### Running Goyal's software which is written in C and saving the outputs
+    #### Modifying the input file config_test for the chosen budget
+    ##### Reading the file
+
     input_file = celfpp_folder_new + "/config_test.txt"
     config_test = open(input_file).read().strip()
 
+    ##### Setting the propagation model in the config_test file as IC or LT based on the diffusion_model
     if diffusion_model == "independent_cascade":
         config_test = " ".join(
             config_test.split(" ")[0:17]
@@ -98,39 +114,46 @@ def celfpp_im(
             + config_test.split(" ")[18:]
         )
 
+    ##### Changing the path to ProbGraphFile
     config_test = " ".join(
         config_test.split(" ")[0:19]
         + [celfpp_folder_new + "/datasets/graph.inf" + "\n\nmcruns"]
         + config_test.split(" ")[20:]
     )
 
+    ##### Setting the mcruns in the config_test file as n_sim
     config_test = " ".join(
         config_test.split(" ")[0:21]
         + [str(n_sim) + "\n\noutdir"]
         + config_test.split(" ")[22:]
     )
 
+    ##### Changing the path to outdir
     config_test = " ".join(
         config_test.split(" ")[0:23]
         + [celfpp_folder_new + "/output" + "\n\nbudget"]
         + config_test.split(" ")[24:]
     )
 
+    ##### Setting the budget in the config_test file as budget
     config_test = " ".join(
         config_test.split(" ")[0:25]
         + [str(budget) + "\n\n#"]
         + config_test.split(" ")[26:]
     )
 
+    ##### Writing the modified input file
     with open(input_file, "w") as f:
         f.write(config_test)
         f.write("\n")
 
+    #### Changing directory to the Goyal's software folder, compiling the C codes by doing make and then coming back
     os.chdir(celfpp_folder_new)
     os.system("make")
     os.chdir("..")
     os.chdir("..")
 
+    # Calling CELF++
     start = timeit.default_timer()
     os.system(
         celfpp_folder_new
@@ -165,6 +188,7 @@ def celfpp_im(
     )
     exp_influence += [exp_influence[-1] for x in range(budget - len(exp_influence))]
 
+    # Saving the results
     if all_upto_budget:
         results = {
             "budget": budget,
