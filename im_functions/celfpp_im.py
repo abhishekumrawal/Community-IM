@@ -165,7 +165,7 @@ def celfpp_im(
     )
     exp_influence += [exp_influence[-1] for x in range(budget - len(exp_influence))]
 
-    if all_upto_budget == True:
+    if all_upto_budget:
         results = {
             "budget": budget,
             "diffusion_model": diffusion_model,

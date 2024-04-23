@@ -1,5 +1,3 @@
-import timeit
-
 import networkx as nx
 import numpy as np
 from cynetdiff.utils import networkx_to_ic_model
@@ -9,7 +7,7 @@ from im_functions.linear_threshold import linear_threshold
 
 
 def true_influence(inpt):
-    start = timeit.default_timer()
+    # start = timeit.default_timer()
     network, seed_set, diffusion_model, n_sim, spontaneous_prob, name_id = inpt
     model = None
     if diffusion_model == "independent_cascade":
@@ -48,7 +46,7 @@ def true_influence(inpt):
 
     results = [seed_set, influence]
 
-    end = timeit.default_timer()
+    # end = timeit.default_timer()
     # logging.info(str(results)+' Time taken: '+str(round(end - start,2))+' seconds.')
 
     return results

@@ -229,7 +229,7 @@ def cofim_im(
     best_seed_set = [item + 1 for item in best_seed_set]
     final_best_seed_sets = [best_seed_set[0 : k + 1] for k in range(0, budget)]
     final_exp_influences = []
-    if all_upto_budget == True:
+    if all_upto_budget:
         results = {
             "budget": budget,
             "diffusion_model": diffusion_model,

@@ -19,17 +19,18 @@ def main_evaluation(
     all_algorithms,
 ):
     "importing required built-in modules"
-    import pickle as pickle
-    import os as os
-    import networkx as nx
-    from multiprocessing import Pool
     import itertools
     import logging
+    import os as os
+    import pickle as pickle
     import timeit
+    from multiprocessing import Pool
+
+    import networkx as nx
 
     "importing required user-defined modules"
-    from im_functions.weighted_network import weighted_network
     from im_functions.true_influence import true_influence
+    from im_functions.weighted_network import weighted_network
 
     "dropping celfpp from "
     all_algorithms = all_algorithms[1:]
@@ -76,7 +77,7 @@ def main_evaluation(
     network = nx.convert_node_labels_to_integers(network, first_label=1)
 
     "adding weights if the network is unweighted"
-    if is_graph_already_weighted == False:
+    if not is_graph_already_weighted:
         network = weighted_network(network, method=weighting_schemes[0])
 
     "results folder"
@@ -146,7 +147,7 @@ def main_evaluation(
         )
         with open(filename_with_path, "rb") as f:
             exp_influences_dict = pickle.load(f)
-    except:
+    except Exception:
         exp_influences_dict = {}
     exp_influences_dict["name_id"] = name_id
 
@@ -164,7 +165,9 @@ def main_evaluation(
 
     "seeds sets for which the expected influences are already there"
     seed_sets_in_exp_influences_dict = [
-        set(item) for item in list(exp_influences_dict.keys()) if not type(item) == str
+        set(item)
+        for item in list(exp_influences_dict.keys())
+        if not isinstance(item, str)
     ]
 
     "reading the output files except celfpp and looking for unique seed sets from all of them"
@@ -200,7 +203,7 @@ def main_evaluation(
 
     try:
         unique_seed_sets.remove({None})
-    except:
+    except Exception:
         pass
 
     # for seed_set in unique_seed_sets:

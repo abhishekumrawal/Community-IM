@@ -4,16 +4,18 @@
 @author: abhishek.umrawal
 """
 
-from im_functions.true_influence import true_influence
+import json
+import logging
+import os
+import pickle
+import random
+import timeit
+from multiprocessing import Pool
+
 import networkx as nx
 import numpy as np
-import timeit
-import random
-import os
-import json
-import pickle
-import logging
-from multiprocessing import Pool
+
+from im_functions.true_influence import true_influence
 
 
 def genetic_im(
@@ -94,7 +96,7 @@ def genetic_im(
     n_sim = 100
     budget_interval = 20
 
-    if all_upto_budget == True:
+    if all_upto_budget:
         budgets = [1] + list(range(budget_interval, budget + 1, budget_interval))
     else:
         budgets = [budget]
@@ -180,7 +182,7 @@ def genetic_im(
                 A[i] = A[np.random.choice(len(A), p=prob)]
 
             # crossover
-            if crossover == True:
+            if crossover:
                 # top two in A
                 top_two = A[np.argsort([-x for x in f])[0:2]]
 
@@ -242,7 +244,7 @@ def genetic_im(
     for i, j in enumerate(budgets):
         max_influences1[j - 1] = max_influences[i]
 
-    if all_upto_budget == True:
+    if all_upto_budget:
         results = {
             "budget": budget,
             "diffusion_model": diffusion_model,

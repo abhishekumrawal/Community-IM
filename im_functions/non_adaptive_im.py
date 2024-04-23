@@ -25,7 +25,7 @@ def non_adaptive_im(inpt):
         is_graph_already_weighted,
     ) = inpt
 
-    if is_graph_already_weighted == False:
+    if not is_graph_already_weighted:
         network = weighted_network(network, method=weighting_scheme)
 
     if algorithm == "celfpp":

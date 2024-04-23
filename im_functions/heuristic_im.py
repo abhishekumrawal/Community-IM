@@ -76,7 +76,7 @@ def heuristic_im(
 
     final_best_seed_sets = [best_seed_set[: k + 1] for k, _ in enumerate(best_seed_set)]
 
-    if all_upto_budget == True:
+    if all_upto_budget:
         results = {
             "budget": budget,
             "diffusion_model": diffusion_model,
