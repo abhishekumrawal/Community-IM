@@ -1,4 +1,4 @@
-Follow the main.py file.
+Follow the **main.py** file.
 
 
 We permit the user to use parts of this repository ONLY for academic research, provided the following paper is properly cited.
